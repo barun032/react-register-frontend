@@ -1,8 +1,8 @@
 // src/components/StatusCards.js
 import React from 'react';
-import { statusTypes } from '../data/registerData';
+import { statusTypes, registerTypes } from '../data/registerData';
 
-const StatusCards = ({ records, selectedRegister }) => {
+const StatusCards = ({ records, selectedRegister, selectedPart }) => {
   const calculateStats = () => {
     const totalRecords = records.length;
     
@@ -40,7 +40,13 @@ const StatusCards = ({ records, selectedRegister }) => {
     <div className="px-4 sm:px-6 lg:px-8 py-6">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-          {selectedRegister.replace(' Register', '')} Overview
+          <span className='pr-2'>Register of Letter</span>
+          {selectedRegister.replace(' Register', '')}
+          {selectedRegister === registerTypes.RECEIVE && selectedPart && (
+            <span className="text-lg font-semibold text-slate-700 ml-2 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
+              {selectedPart}
+            </span>
+          )}
         </h2>
         <p className="text-gray-600">
           Track and manage your document workflow

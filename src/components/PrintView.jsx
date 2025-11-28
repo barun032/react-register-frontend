@@ -1,8 +1,8 @@
 // src/components/PrintView.js
 import React, { useEffect } from 'react';
-import { registerTableHeaders, registerFieldMappings } from '../data/registerData';
+import { registerTableHeaders, registerFieldMappings, registerTypes } from '../data/registerData';
 
-const PrintView = ({ selectedRegister, records, onClose }) => {
+const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
   const tableHeaders = registerTableHeaders[selectedRegister] || [];
   const fieldMappings = registerFieldMappings[selectedRegister] || {};
 
@@ -41,6 +41,9 @@ const PrintView = ({ selectedRegister, records, onClose }) => {
       {/* Header */}
       <div className="text-center mb-6 border-b border-gray-300 pb-4">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">{selectedRegister}</h1>
+        {selectedRegister === registerTypes.RECEIVE && selectedPart && (
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">{selectedPart}</h2>
+        )}
         <p className="text-gray-600">
           Generated on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
         </p>

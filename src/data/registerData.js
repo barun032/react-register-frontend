@@ -1,181 +1,172 @@
 // src/data/registerData.js
 export const registerTypes = {
-  DISPATCH: 'Dispatch Register',
   RECEIVE: 'Receive Register',
   ISSUED: 'Issued Register'
 };
 
+// Add part types for Receive Register
+export const receivePartTypes = {
+  PART_I: 'Part I',
+  PART_II: 'Part II', 
+  PART_III: 'Part III',
+  PART_IV: 'Part IV'
+};
+
 export const registerTableHeaders = {
-  [registerTypes.DISPATCH]: [
-    // Row 1 - Main headers with rowspan
-    [
-      { name: 'Consecutive No.', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Date', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'To whom addressed', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Short subject', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Where the draft is placed', colspan: 3, className: 'bg-green-100' },
-      { name: 'No. and date of reply received', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Reminder', colspan: 2, className: 'bg-yellow-100' },
-      { name: 'Value of Stamp', colspan: 2, className: 'bg-purple-100' },
-      { name: 'Remarks', rowspan: 2, className: 'bg-blue-100' }
-    ],
-    // Row 2 - Subheaders
-    [
-      { name: 'File No. & Serial No.', className: 'bg-green-50' },
-      { name: 'No. & title of collection', className: 'bg-green-50' },
-      { name: 'No. of file within the collection', className: 'bg-green-50' },
-      { name: 'No.', className: 'bg-yellow-50' },
-      { name: 'Date', className: 'bg-yellow-50' },
-      { name: 'Rs.', className: 'bg-purple-50' },
-      { name: 'P.', className: 'bg-purple-50' }
-    ]
-  ],
   [registerTypes.RECEIVE]: [
     // Row 1 - Main headers with rowspan
     [
-      { name: 'Consecutive No.', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Date', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'From whom received', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Short subject', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Reference details', colspan: 3, className: 'bg-green-100' },
-      { name: 'Action Required', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Follow-up', colspan: 2, className: 'bg-yellow-100' },
-      { name: 'Status', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Remarks', rowspan: 2, className: 'bg-blue-100' }
+      { name: 'Consecutive No.', rowspan: 2 },
+      { name: 'Date of receipt in office', rowspan: 2 },
+      { name: 'Letter etc.', colspan: 3 },
+      { name: 'Short subject', rowspan: 2 },
+      { name: 'Remainders', colspan: 2 },
+      { name: 'Where the letter is placed', colspan: 4 },
+      { name: 'Type of action', rowspan: 2 },
+      { name: 'Dispatch Register', colspan: 2 },
+      { name: 'Endorsed To', rowspan: 2 }
     ],
     // Row 2 - Subheaders
     [
-      { name: 'Reference No.', className: 'bg-green-50' },
-      { name: 'Reference Date', className: 'bg-green-50' },
-      { name: 'Department', className: 'bg-green-50' },
-      { name: 'Follow-up Date', className: 'bg-yellow-50' },
-      { name: 'Follow-up Type', className: 'bg-yellow-50' }
+      { name: 'From whom received' },
+      { name: 'Number' },
+      { name: 'Date' },
+      { name: 'Number' },
+      { name: 'Date' },
+      { name: 'File No.' },
+      { name: 'Sl. No.' },
+      { name: 'No. of the Collection' },
+      { name: 'No. of the file within the collection' },
+      { name: 'Memo No.'},
+      { name: 'Date.'},
     ]
   ],
   [registerTypes.ISSUED]: [
     // Row 1 - Main headers with rowspan
     [
-      { name: 'Consecutive No.', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Date', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Item Details', colspan: 3, className: 'bg-green-100' },
-      { name: 'Distribution Details', colspan: 2, className: 'bg-yellow-100' },
-      { name: 'Authorization', colspan: 2, className: 'bg-purple-100' },
-      { name: 'Status', rowspan: 2, className: 'bg-blue-100' },
-      { name: 'Remarks', rowspan: 2, className: 'bg-blue-100' }
+      { name: 'Consecutive No.', rowspan: 2 },
+      { name: 'Date', rowspan: 2 },
+      { name: 'To whom addressed', rowspan: 2 },
+      { name: 'Short subject', rowspan: 2 },
+      { name: 'Where the draft is placed', colspan: 3 },
+      { name: 'No. and date of reply receive', rowspan: 2 },
+      { name: 'Receive Register Ref.', rowspan: 2 },
+      { name: 'Reminder', colspan: 2 },
+      { name: 'Value of Stamp.', colspan: 2 },
+      { name: 'Remarks', rowspan: 2 },
+      { name: 'Name of the Officer.', rowspan: 2 }
     ],
     // Row 2 - Subheaders
     [
-      { name: 'Item Name', className: 'bg-green-50' },
-      { name: 'Quantity', className: 'bg-green-50' },
-      { name: 'Unit', className: 'bg-green-50' },
-      { name: 'Issued To', className: 'bg-yellow-50' },
-      { name: 'Department', className: 'bg-yellow-50' },
-      { name: 'Authorized By', className: 'bg-purple-50' },
-      { name: 'Authorization Date', className: 'bg-purple-50' }
+      { name: 'File No. & Serial No.' },
+      { name: 'No. & title of collection' },
+      { name: 'No. of file within the collection' },
+      { name: 'No.' },
+      { name: 'Date' },
+      { name: 'Rs.' },
+      { name: 'P.' }
     ]
   ]
 };
 
 // Define the actual data fields that correspond to each header
 export const registerFieldMappings = {
-  [registerTypes.DISPATCH]: {
-    'Consecutive No.': 'id',
-    'Date': 'date',
-    'To whom addressed': 'to',
-    'Short subject': 'subject',
-    'File No. & Serial No.': 'fileNo',
-    'No. & title of collection': 'collectionTitle',
-    'No. of file within the collection': 'fileNumber',
-    'No. and date of reply received': 'replyDetails',
-    'No.': 'reminderNumber',
-    'Date': 'reminderDate',
-    'Rs.': 'stampRupees',
-    'P.': 'stampPaise',
-    'Remarks': 'remarks'
-  },
   [registerTypes.RECEIVE]: {
     'Consecutive No.': 'id',
-    'Date': 'date',
+    'Date of receipt in office': 'date',
     'From whom received': 'from',
+    'Number_1': 'referenceNo',        // First 'Number' (Reference)
+    'Date_1': 'referenceDate',        // First 'Date' (Reference)
     'Short subject': 'subject',
-    'Reference No.': 'referenceNo',
-    'Reference Date': 'referenceDate',
-    'Department': 'department',
-    'Action Required': 'actionRequired',
-    'Follow-up Date': 'followupDate',
-    'Follow-up Type': 'followupType',
-    'Status': 'status',
-    'Remarks': 'remarks'
+    'Number_2': 'reminderNumber',     // Second 'Number' (Reminder)
+    'Date_2': 'reminderDate',         // Second 'Date' (Reminder)
+    'File No.': 'fileNo',
+    'Sl. No.': 'serialNo',
+    'No. of the Collection': 'collectionNumber',
+    'No. of the file within the collection': 'fileInCollection',
+    'Type of action': 'actionType',
+    'Memo No.': 'dispatchMemoNo',
+    'Date.': 'dispatchDate',
+    'Endorsed To': 'endorsedTo'
   },
   [registerTypes.ISSUED]: {
     'Consecutive No.': 'id',
     'Date': 'date',
-    'Item Name': 'itemName',
-    'Quantity': 'quantity',
-    'Unit': 'unit',
-    'Issued To': 'issuedTo',
-    'Department': 'department',
-    'Authorized By': 'authorizedBy',
-    'Authorization Date': 'authorizationDate',
-    'Status': 'status',
-    'Remarks': 'remarks'
+    'To whom addressed': 'to',
+    'Short subject': 'subject',
+    'File No. & Serial No.': 'fileSerialNo',
+    'No. & title of collection': 'collectionTitle',
+    'No. of file within the collection': 'fileInCollection',
+    'No. and date of reply receive': 'replyDetails',
+    'Receive Register Ref.': 'receiveRef',
+    'No.': 'reminderNumber',
+    'Date': 'reminderDate',
+    'Rs.': 'stampRupees',
+    'P.': 'stampPaise',
+    'Remarks': 'remarks',
+    'Name of the Officer.': 'officerName'
   }
 };
 
 // Updated form fields to match the new structure
 export const registerFields = {
-  [registerTypes.DISPATCH]: [
-    { name: 'date', label: 'Date', type: 'date', required: true },
-    { name: 'to', label: 'To whom addressed', type: 'text', required: true },
-    { name: 'subject', label: 'Short subject', type: 'text', required: true },
-    { name: 'fileNo', label: 'File No. & Serial No.', type: 'text' },
+  [registerTypes.RECEIVE]: [
+    { name: 'date', label: 'Date of receipt in office', type: 'date' },
+    { name: 'from', label: 'From whom received', type: 'text' },
+    { name: 'referenceNo', label: 'Reference Number', type: 'text' },
+    { name: 'referenceDate', label: 'Reference Date', type: 'date' },
+    { name: 'subject', label: 'Short subject', type: 'text' },
+    { name: 'reminderNumber', label: 'Reminder Number', type: 'text' },
+    { name: 'reminderDate', label: 'Reminder Date', type: 'date' },
+    { name: 'fileNo', label: 'File No.', type: 'text' },
+    { name: 'serialNo', label: 'Serial No.', type: 'text' },
+    { name: 'collectionNumber', label: 'No. of the Collection', type: 'text' },
+    { name: 'fileInCollection', label: 'No. of file within the collection', type: 'text' },
+    { 
+      name: 'actionType', 
+      label: 'Type of action', 
+      type: 'select', 
+      options: ['Returnable', 'Not Returnable', 'Attached to File']
+    },
+    { name: 'dispatchMemoNo', label: 'Dispatch Memo No.', type: 'text' },
+    { name: 'dispatchDate', label: 'Dispatch Date', type: 'date' },
+    { 
+      name: 'endorsedTo', 
+      label: 'Endorsed To', 
+      type: 'select', 
+      options: [
+        'Rupali Santra',
+        'Bikash Sen',
+        'Sadhana Singha', 
+        'Ummey Salma',
+      ]
+    }
+  ],
+  [registerTypes.ISSUED]: [
+    { name: 'date', label: 'Date', type: 'date' },
+    { name: 'to', label: 'To whom addressed', type: 'text' },
+    { name: 'subject', label: 'Short subject', type: 'text' },
+    { name: 'fileSerialNo', label: 'File No. & Serial No.', type: 'text' },
     { name: 'collectionTitle', label: 'No. & title of collection', type: 'text' },
-    { name: 'fileNumber', label: 'No. of file within the collection', type: 'text' },
-    { name: 'replyDetails', label: 'No. and date of reply received', type: 'text' },
-    { name: 'reminderNumber', label: 'Reminder No.', type: 'number' },
+    { name: 'fileInCollection', label: 'No. of file within the collection', type: 'text' },
+    { name: 'replyDetails', label: 'No. and date of reply receive', type: 'text' },
+    { name: 'receiveRef', label: 'Receive Register Ref.', type: 'text' },
+    { name: 'reminderNumber', label: 'Reminder Number', type: 'text' },
     { name: 'reminderDate', label: 'Reminder Date', type: 'date' },
     { name: 'stampRupees', label: 'Stamp Value (Rs.)', type: 'number' },
     { name: 'stampPaise', label: 'Stamp Value (P.)', type: 'number' },
-    { name: 'remarks', label: 'Remarks', type: 'textarea' }
-  ],
-  [registerTypes.RECEIVE]: [
-    { name: 'date', label: 'Date', type: 'date', required: true },
-    { name: 'from', label: 'From whom received', type: 'text', required: true },
-    { name: 'subject', label: 'Short subject', type: 'text', required: true },
-    { name: 'referenceNo', label: 'Reference No.', type: 'text' },
-    { name: 'referenceDate', label: 'Reference Date', type: 'date' },
-    { name: 'department', label: 'Department', type: 'text' },
-    { name: 'actionRequired', label: 'Action Required', type: 'text' },
-    { name: 'followupDate', label: 'Follow-up Date', type: 'date' },
-    { name: 'followupType', label: 'Follow-up Type', type: 'text' },
+    { name: 'remarks', label: 'Remarks', type: 'textarea' },
     { 
-      name: 'status', 
-      label: 'Status', 
-      type: 'select', 
-      options: ['Pending', 'Completed', 'Acknowledged'],
-      required: true,
-      default: 'Pending'
-    },
-    { name: 'remarks', label: 'Remarks', type: 'textarea' }
-  ],
-  [registerTypes.ISSUED]: [
-    { name: 'date', label: 'Date', type: 'date', required: true },
-    { name: 'itemName', label: 'Item Name', type: 'text', required: true },
-    { name: 'quantity', label: 'Quantity', type: 'number', required: true },
-    { name: 'unit', label: 'Unit', type: 'text', required: true },
-    { name: 'issuedTo', label: 'Issued To', type: 'text', required: true },
-    { name: 'department', label: 'Department', type: 'text' },
-    { name: 'authorizedBy', label: 'Authorized By', type: 'text', required: true },
-    { name: 'authorizationDate', label: 'Authorization Date', type: 'date', required: true },
-    { 
-      name: 'status', 
-      label: 'Status', 
-      type: 'select', 
-      options: ['Pending', 'Completed', 'Partially Issued'],
-      required: true,
-      default: 'Pending'
-    },
-    { name: 'remarks', label: 'Remarks', type: 'textarea' }
+      name: 'officerName', 
+      label: 'Name of the Officer', 
+      type: 'select',
+      options: [
+        'Rupali Santra',
+        'Bikash Sen',
+        'Sadhana Singha', 
+        'Ummey Salma',
+      ]
+    }
   ]
 };
 

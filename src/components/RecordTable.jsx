@@ -36,18 +36,30 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
     }
   };
 
-  // Get all column names for data rendering
-  const getAllColumnNames = () => {
-    const allColumns = [];
-    tableHeaders.forEach(row => {
-      row.forEach(header => {
-        if (!allColumns.includes(header.name)) {
-          allColumns.push(header.name);
-        }
-      });
+  // In RecordTable.jsx - Update the getAllColumnNames function
+const getAllColumnNames = () => {
+  const allColumns = [];
+  let headerCount = {};
+  
+  tableHeaders.forEach((row, rowIndex) => {
+    row.forEach((header, headerIndex) => {
+      let uniqueName = header.name;
+      
+      // Handle duplicate names by adding suffix
+      if (headerCount[header.name]) {
+        headerCount[header.name]++;
+        uniqueName = `${header.name}_${headerCount[header.name]}`;
+      } else {
+        headerCount[header.name] = 1;
+      }
+      
+      if (!allColumns.includes(uniqueName)) {
+        allColumns.push(uniqueName);
+      }
     });
-    return allColumns;
-  };
+  });
+  return allColumns;
+};
 
   const allColumns = getAllColumnNames();
 
@@ -85,7 +97,7 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
                       key={headerIndex}
                       rowSpan={header.rowspan || 1}
                       colSpan={header.colspan || 1}
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider border border-gray-200"
+                      className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 ${header.className || ''}`}
                     >
                       {header.name}
                     </th>

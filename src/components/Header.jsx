@@ -1,12 +1,10 @@
-// src/components/Header.js (Refined Version)
+// src/components/Header.js
 import React from 'react';
-import { registerTypes } from '../data/registerData';
+import { registerTypes, receivePartTypes } from '../data/registerData';
 
-const Header = ({ selectedRegister, onRegisterChange, onCreateClick }) => {
+const Header = ({ selectedRegister, selectedPart, onRegisterChange, onPartChange, onCreateClick }) => {
   const getCreateButtonText = () => {
     switch (selectedRegister) {
-      case registerTypes.DISPATCH:
-        return 'Create Dispatch';
       case registerTypes.RECEIVE:
         return 'Create Receive';
       case registerTypes.ISSUED:
@@ -31,6 +29,29 @@ const Header = ({ selectedRegister, onRegisterChange, onCreateClick }) => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3 items-center w-full sm:w-auto">
+            {/* Part Dropdown - Only show for Receive Register */}
+            {selectedRegister === registerTypes.RECEIVE && (
+              <div className="relative w-full sm:w-40">
+                <select
+                  value={selectedPart}
+                  onChange={(e) => onPartChange(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 appearance-none cursor-pointer focus:border-slate-500 focus:ring-1 focus:ring-slate-500 focus:outline-none"
+                >
+                  {Object.values(receivePartTypes).map((part) => (
+                    <option key={part} value={part}>
+                      {part}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            )}
+            
+            {/* Register Dropdown */}
             <div className="relative w-full sm:w-56">
               <select
                 value={selectedRegister}
@@ -50,6 +71,7 @@ const Header = ({ selectedRegister, onRegisterChange, onCreateClick }) => {
               </div>
             </div>
             
+            {/* Create Button */}
             <button
               onClick={onCreateClick}
               className="w-full sm:w-auto px-5 py-2.5 bg-slate-700 text-white font-medium rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 flex items-center justify-center space-x-2"
