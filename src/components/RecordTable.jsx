@@ -1,6 +1,6 @@
 // src/components/RecordTable.js (With Soft Borders)
 import React from 'react';
-import { registerTableHeaders, registerFieldMappings, statusTypes } from '../data/registerData';
+import { registerTableHeaders, registerFieldMappings, registerTypes, statusTypes } from '../data/registerData';
 
 const RecordTable = ({ selectedRegister, records, onPrint }) => {
   const tableHeaders = registerTableHeaders[selectedRegister] || [];
@@ -36,30 +36,53 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
     }
   };
 
-  // In RecordTable.jsx - Update the getAllColumnNames function
-const getAllColumnNames = () => {
-  const allColumns = [];
-  let headerCount = {};
-  
-  tableHeaders.forEach((row, rowIndex) => {
-    row.forEach((header, headerIndex) => {
-      let uniqueName = header.name;
-      
-      // Handle duplicate names by adding suffix
-      if (headerCount[header.name]) {
-        headerCount[header.name]++;
-        uniqueName = `${header.name}_${headerCount[header.name]}`;
-      } else {
-        headerCount[header.name] = 1;
-      }
-      
-      if (!allColumns.includes(uniqueName)) {
-        allColumns.push(uniqueName);
-      }
-    });
-  });
-  return allColumns;
-};
+  // 🐛 FIX: This function is the root cause of the issue. 
+  // It must return all column names in the correct display order, 
+  // including the 'rowspan: 2' headers from Row 1, and the implicit 'Status' column.
+  const getAllColumnNames = () => {
+    if (selectedRegister === registerTypes.RECEIVE) {
+      return [
+        'Consecutive No.',
+        'Date of receipt in office',
+        'From whom received', // Sub-header under 'Letter etc.'
+        'Reference Number',   // Sub-header under 'Letter etc.'
+        'Reference Date',     // Sub-header under 'Letter etc.'
+        'Short subject',
+        'Reminder Number',    // Sub-header under 'Remainders'
+        'Reminder Date',      // Sub-header under 'Remainders'
+        'File No.',           // Sub-header under 'Where the letter is placed'
+        'Sl. No.',            // Sub-header under 'Where the letter is placed'
+        'No. of the Collection', // Sub-header under 'Where the letter is placed'
+        'No. of the file within the collection', // Sub-header under 'Where the letter is placed'
+        'Type of action',
+        'Memo No.',           // Sub-header under 'Dispatch Register'
+        'Dispatch Date',      // Sub-header under 'Dispatch Register'
+        'Endorsed To',
+        'Status' // The implicitly required column for status display
+      ];
+    } else if (selectedRegister === registerTypes.ISSUED) {
+      return [
+        'Consecutive No.',
+        'Date',
+        'To whom addressed',
+        'Short subject',
+        'File No. & Serial No.',       // Sub-header under 'Where the draft is placed'
+        'No. & title of collection',   // Sub-header under 'Where the draft is placed'
+        'No. of file within the collection', // Sub-header under 'Where the draft is placed'
+        'No. and date of reply receive',
+        'Receive Register Ref.',
+        'Reminder No.',                // Sub-header under 'Reminder'
+        'Reminder Date',               // Sub-header under 'Reminder'
+        'Rs.',                         // Sub-header under 'Value of Stamp.'
+        'P.',                          // Sub-header under 'Value of Stamp.'
+        'Remarks',
+        'Name of the Officer.',
+        'Status' // The implicitly required column for status display
+      ];
+    }
+    
+    return [];
+  };
 
   const allColumns = getAllColumnNames();
 
@@ -102,8 +125,12 @@ const getAllColumnNames = () => {
                       {header.name}
                     </th>
                   ))}
+                  {/* Add 'Status' column header explicitly if it's the last column */}
+                  {rowIndex === 0 && <th rowSpan={2} className="px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200">Status</th>}
                 </tr>
               ))}
+              {/* This is the final row, so we don't need to check for rowIndex==1 if we fix the above logic */}
+              {tableHeaders.length === 1 && <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200">Status</th>}
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {records.map((record, index) => (
@@ -112,10 +139,18 @@ const getAllColumnNames = () => {
                   className="hover:bg-gray-50 transition-colors duration-150"
                 >
                   {allColumns.map((columnName, colIndex) => {
-                    const fieldName = fieldMappings[columnName];
+                    // Special case for 'Status' field, which is not in fieldMappings but is a record property
+                    const isStatusColumn = columnName === 'Status';
+                    // Special case for 'Consecutive No.', which uses 'id' but is custom rendered
+                    const isIdColumn = columnName === 'Consecutive No.';
+                    
+                    const fieldName = isIdColumn ? 'id' : isStatusColumn ? 'status' : fieldMappings[columnName];
                     const value = record[fieldName];
                     
-                    if (columnName === 'Status') {
+                    // console.log(`Column: ${columnName}, Field: ${fieldName}, Value:`, value);
+
+                    if (isStatusColumn) {
+                      // Status rendering logic
                       return (
                         <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm border border-gray-200">
                           <div className="flex items-center justify-center space-x-2">
@@ -128,25 +163,19 @@ const getAllColumnNames = () => {
                       );
                     }
                     
-                    if (columnName === 'Consecutive No.') {
+                    if (isIdColumn) {
+                      // Consecutive No. rendering logic
                       return (
                         <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 text-center border border-gray-200">
                           <span className="text-sm font-mono font-medium text-slate-700 bg-slate-50 px-2 py-1 rounded border border-slate-200">
-                            {value}
+                            {record.id || value}
                           </span>
                         </td>
                       );
                     }
 
-                    if (columnName === 'Quantity') {
-                      return (
-                        <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 text-center border border-gray-200">
-                          {value || '0'}
-                        </td>
-                      );
-                    }
-
                     if (columnName === 'Rs.' || columnName === 'P.') {
+                      // Stamp Value rendering logic
                       return (
                         <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-center border border-gray-200">
                           {value || '0'}

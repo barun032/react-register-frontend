@@ -4,7 +4,7 @@ export const registerTypes = {
   ISSUED: 'Issued Register'
 };
 
-// Add part types for Receive Register
+// Update part types for Receive Register to Roman numerals
 export const receivePartTypes = {
   PART_I: 'Part I',
   PART_II: 'Part II', 
@@ -29,16 +29,16 @@ export const registerTableHeaders = {
     // Row 2 - Subheaders
     [
       { name: 'From whom received' },
-      { name: 'Number' },
-      { name: 'Date' },
-      { name: 'Number' },
-      { name: 'Date' },
+      { name: 'Reference Number' },
+      { name: 'Reference Date' },
+      { name: 'Reminder Number' },
+      { name: 'Reminder Date' },
       { name: 'File No.' },
       { name: 'Sl. No.' },
       { name: 'No. of the Collection' },
       { name: 'No. of the file within the collection' },
       { name: 'Memo No.'},
-      { name: 'Date.'},
+      { name: 'Dispatch Date'},
     ]
   ],
   [registerTypes.ISSUED]: [
@@ -61,8 +61,8 @@ export const registerTableHeaders = {
       { name: 'File No. & Serial No.' },
       { name: 'No. & title of collection' },
       { name: 'No. of file within the collection' },
-      { name: 'No.' },
-      { name: 'Date' },
+      { name: 'Reminder No.' },
+      { name: 'Reminder Date' },
       { name: 'Rs.' },
       { name: 'P.' }
     ]
@@ -75,18 +75,18 @@ export const registerFieldMappings = {
     'Consecutive No.': 'id',
     'Date of receipt in office': 'date',
     'From whom received': 'from',
-    'Number_1': 'referenceNo',        // First 'Number' (Reference)
-    'Date_1': 'referenceDate',        // First 'Date' (Reference)
+    'Reference Number': 'referenceNo',
+    'Reference Date': 'referenceDate',
     'Short subject': 'subject',
-    'Number_2': 'reminderNumber',     // Second 'Number' (Reminder)
-    'Date_2': 'reminderDate',         // Second 'Date' (Reminder)
+    'Reminder Number': 'reminderNumber',
+    'Reminder Date': 'reminderDate',
     'File No.': 'fileNo',
     'Sl. No.': 'serialNo',
     'No. of the Collection': 'collectionNumber',
     'No. of the file within the collection': 'fileInCollection',
     'Type of action': 'actionType',
     'Memo No.': 'dispatchMemoNo',
-    'Date.': 'dispatchDate',
+    'Dispatch Date': 'dispatchDate',
     'Endorsed To': 'endorsedTo'
   },
   [registerTypes.ISSUED]: {
@@ -99,8 +99,8 @@ export const registerFieldMappings = {
     'No. of file within the collection': 'fileInCollection',
     'No. and date of reply receive': 'replyDetails',
     'Receive Register Ref.': 'receiveRef',
-    'No.': 'reminderNumber',
-    'Date': 'reminderDate',
+    'Reminder No.': 'reminderNumber',
+    'Reminder Date': 'reminderDate',
     'Rs.': 'stampRupees',
     'P.': 'stampPaise',
     'Remarks': 'remarks',
@@ -108,14 +108,15 @@ export const registerFieldMappings = {
   }
 };
 
-// Updated form fields to match the new structure
+// Updated form fields to match the table structure exactly
 export const registerFields = {
   [registerTypes.RECEIVE]: [
-    { name: 'date', label: 'Date of receipt in office', type: 'date' },
-    { name: 'from', label: 'From whom received', type: 'text' },
+    // Note: 'Consecutive No.' is auto-generated as 'id', so it's not in the form
+    { name: 'date', label: 'Date of receipt in office', type: 'date', required: true },
+    { name: 'from', label: 'From whom received', type: 'text', required: true },
     { name: 'referenceNo', label: 'Reference Number', type: 'text' },
     { name: 'referenceDate', label: 'Reference Date', type: 'date' },
-    { name: 'subject', label: 'Short subject', type: 'text' },
+    { name: 'subject', label: 'Short subject', type: 'textarea', rows: 3, required: true },
     { name: 'reminderNumber', label: 'Reminder Number', type: 'text' },
     { name: 'reminderDate', label: 'Reminder Date', type: 'date' },
     { name: 'fileNo', label: 'File No.', type: 'text' },
@@ -126,7 +127,8 @@ export const registerFields = {
       name: 'actionType', 
       label: 'Type of action', 
       type: 'select', 
-      options: ['Returnable', 'Not Returnable', 'Attached to File']
+      options: ['Returnable', 'Not Returnable', 'Attached to File'],
+      required: true
     },
     { name: 'dispatchMemoNo', label: 'Dispatch Memo No.', type: 'text' },
     { name: 'dispatchDate', label: 'Dispatch Date', type: 'date' },
@@ -139,13 +141,15 @@ export const registerFields = {
         'Bikash Sen',
         'Sadhana Singha', 
         'Ummey Salma',
-      ]
+      ],
+      required: true
     }
   ],
   [registerTypes.ISSUED]: [
-    { name: 'date', label: 'Date', type: 'date' },
-    { name: 'to', label: 'To whom addressed', type: 'text' },
-    { name: 'subject', label: 'Short subject', type: 'text' },
+    // Note: 'Consecutive No.' is auto-generated as 'id', so it's not in the form
+    { name: 'date', label: 'Date', type: 'date', required: true },
+    { name: 'to', label: 'To whom addressed', type: 'text', required: true },
+    { name: 'subject', label: 'Short subject', type: 'textarea', rows: 3, required: true },
     { name: 'fileSerialNo', label: 'File No. & Serial No.', type: 'text' },
     { name: 'collectionTitle', label: 'No. & title of collection', type: 'text' },
     { name: 'fileInCollection', label: 'No. of file within the collection', type: 'text' },
@@ -153,8 +157,8 @@ export const registerFields = {
     { name: 'receiveRef', label: 'Receive Register Ref.', type: 'text' },
     { name: 'reminderNumber', label: 'Reminder Number', type: 'text' },
     { name: 'reminderDate', label: 'Reminder Date', type: 'date' },
-    { name: 'stampRupees', label: 'Stamp Value (Rs.)', type: 'number' },
-    { name: 'stampPaise', label: 'Stamp Value (P.)', type: 'number' },
+    { name: 'stampRupees', label: 'Stamp Value (Rs.)', type: 'number', min: 0 },
+    { name: 'stampPaise', label: 'Stamp Value (P.)', type: 'number', min: 0, max: 99 },
     { name: 'remarks', label: 'Remarks', type: 'textarea' },
     { 
       name: 'officerName', 
@@ -165,7 +169,8 @@ export const registerFields = {
         'Bikash Sen',
         'Sadhana Singha', 
         'Ummey Salma',
-      ]
+      ],
+      required: true
     }
   ]
 };

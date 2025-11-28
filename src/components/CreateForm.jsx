@@ -1,25 +1,29 @@
 // src/components/CreateForm.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { registerFields, registerTypes } from '../data/registerData';
 
-const registerFieldGroups = {
-  [registerTypes.RECEIVE]: [
-    'date', 'from', 'referenceNo', 'referenceDate', 'subject',
-    'reminderNumber', 'reminderDate', 'fileNo', 'serialNo', 
-    'collectionNumber', 'fileInCollection', 'actionType',
-    'dispatchMemoNo', 'dispatchDate', 'endorsedTo'
-  ],
-  [registerTypes.ISSUED]: [
-    'date', 'to', 'subject', 'fileSerialNo', 'collectionTitle', 
-    'fileInCollection', 'replyDetails', 'receiveRef', 'reminderNumber', 
-    'reminderDate', 'stampRupees', 'stampPaise', 'remarks', 'officerName'
-  ]
-};
+const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isOpen, onClose, onSubmit }) => {
+  // Initialize formData with empty values for current register fields
+  const initializeFormData = () => {
+    const fields = registerFields[selectedRegister] || [];
+    const initialData = {};
+    fields.forEach(field => {
+      initialData[field.name] = '';
+    });
+    return initialData;
+  };
 
-const CreateForm = ({ selectedRegister, isOpen, onClose, onSubmit }) => {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(initializeFormData());
+  
+  // Reset form data when register changes
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(initializeFormData());
+    }
+  }, [selectedRegister, isOpen]);
+
+  // Get fields for the currently selected register
   const fields = registerFields[selectedRegister] || [];
-  const fieldOrder = registerFieldGroups[selectedRegister] || [];
 
   const handleInputChange = (fieldName, value) => {
     setFormData(prev => ({
@@ -30,34 +34,35 @@ const CreateForm = ({ selectedRegister, isOpen, onClose, onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const id = `REG-${Date.now()}`;
+    
+    // Create the record with all form data and consecutive number as ID
     const recordWithDefaults = { 
-      status: 'Pending', 
-      ...formData, 
-      id 
+      id: nextConsecutiveNumber.toString(), // Use consecutive number as ID
+      status: 'Pending',
+      ...formData
     };
+    
+    console.log('Submitting record for', selectedRegister, ':', recordWithDefaults);
+    
     onSubmit(recordWithDefaults);
-    setFormData({});
+    setFormData(initializeFormData());
     onClose();
   };
 
   const handleClose = () => {
-    setFormData({});
+    setFormData(initializeFormData());
     onClose();
   };
 
-  const getFieldByName = (fieldName) => {
-    return fields.find(field => field.name === fieldName);
-  };
-
-  const renderField = (field, value) => {
+  const renderField = (field) => {
+    const value = formData[field.name] || '';
     const commonClasses = "w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 bg-white";
     
     switch (field.type) {
       case 'textarea':
         return (
           <textarea
-            value={value || ''}
+            value={value}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
             rows={4}
             className={`${commonClasses} resize-none`}
@@ -67,7 +72,7 @@ const CreateForm = ({ selectedRegister, isOpen, onClose, onSubmit }) => {
       case 'select':
         return (
           <select
-            value={value || ''}
+            value={value}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
             className={`${commonClasses} appearance-none bg-white`}
           >
@@ -83,16 +88,26 @@ const CreateForm = ({ selectedRegister, isOpen, onClose, onSubmit }) => {
         return (
           <input
             type="date"
-            value={value || ''}
+            value={value}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
             className={commonClasses}
+          />
+        );
+      case 'number':
+        return (
+          <input
+            type="number"
+            value={value}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            className={commonClasses}
+            placeholder={`Enter ${field.label.toLowerCase()}...`}
           />
         );
       default:
         return (
           <input
-            type={field.type}
-            value={value || ''}
+            type="text"
+            value={value}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
             className={commonClasses}
             placeholder={`Enter ${field.label.toLowerCase()}...`}
@@ -119,8 +134,9 @@ const CreateForm = ({ selectedRegister, isOpen, onClose, onSubmit }) => {
                   Create {selectedRegister.replace(' Register', '')} Record
                 </h2>
                 <p className="text-slate-200 text-sm mt-1">
-                  Fill in the details below to create a new record
+                  Fill in the details below to create a new {selectedRegister.replace(' Register', '').toLowerCase()} record
                 </p>
+                
               </div>
               <button
                 onClick={handleClose}
@@ -135,11 +151,36 @@ const CreateForm = ({ selectedRegister, isOpen, onClose, onSubmit }) => {
           
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {fieldOrder.map((fieldName) => {
-                const field = getFieldByName(fieldName);
-                if (!field) return null;
+            
 
+            {/* Consecutive Number Field - Read Only */}
+            <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Consecutive No.
+                </label>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="text"
+                    value={nextConsecutiveNumber}
+                    readOnly
+                    className="w-24 px-3 py-2.5 border border-slate-300 rounded-lg bg-slate-100 text-slate-700 font-mono font-bold text-center"
+                  />
+                  <span className="text-sm text-slate-600">
+                    {selectedRegister === registerTypes.RECEIVE && selectedPart 
+                      ? `This will be record #${nextConsecutiveNumber} in ${selectedPart}`
+                      : `This will be record #${nextConsecutiveNumber} in ${selectedRegister}`
+                    }
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Consecutive number is automatically generated and cannot be edited
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {fields.map((field) => {
                 const isTextarea = field.type === 'textarea';
                 
                 return (
@@ -148,9 +189,9 @@ const CreateForm = ({ selectedRegister, isOpen, onClose, onSubmit }) => {
                     className={`space-y-2 ${isTextarea ? 'md:col-span-2' : ''}`}
                   >
                     <label className="block text-sm font-medium text-gray-700">
-                      {field.label}
+                      {field.label} {field.required && <span className="text-red-500">*</span>}
                     </label>
-                    {renderField(field, formData[field.name])}
+                    {renderField(field)}
                     {field.description && (
                       <p className="text-xs text-gray-500 mt-1">{field.description}</p>
                     )}
@@ -158,6 +199,19 @@ const CreateForm = ({ selectedRegister, isOpen, onClose, onSubmit }) => {
                 );
               })}
             </div>
+
+            {/* Show message if no fields are available */}
+            {fields.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                  <span className="text-2xl">⚠️</span>
+                </div>
+                <h3 className="text-base font-medium text-gray-900 mb-2">No form fields configured</h3>
+                <p className="text-gray-600">
+                  No form fields are defined for {selectedRegister}. Please check the register configuration.
+                </p>
+              </div>
+            )}
             
             {/* Form Actions */}
             <div className="flex gap-3 pt-6 mt-6 border-t border-gray-200">
@@ -170,7 +224,8 @@ const CreateForm = ({ selectedRegister, isOpen, onClose, onSubmit }) => {
               </button>
               <button
                 type="submit"
-                className="flex-1 px-4 py-2.5 bg-slate-700 text-white rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 font-medium"
+                disabled={fields.length === 0}
+                className="flex-1 px-4 py-2.5 bg-slate-700 text-white rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Create Record
               </button>

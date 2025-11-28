@@ -10,16 +10,16 @@ import PrintView from './components/PrintView';
 
 function App() {
   const [selectedRegister, setSelectedRegister] = useState(registerTypes.RECEIVE);
-  const [selectedPart, setSelectedPart] = useState(receivePartTypes.PART_I); // Changed to PART_I
+  const [selectedPart, setSelectedPart] = useState(receivePartTypes.PART_I);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isPrintView, setIsPrintView] = useState(false);
   
   const [allRecords, setAllRecords] = useLocalStorage('onlineRegister', {
     [registerTypes.RECEIVE]: {
-      [receivePartTypes.PART_I]: [],    // Updated to PART_I
-      [receivePartTypes.PART_II]: [],   // Updated to PART_II
-      [receivePartTypes.PART_III]: [],  // Updated to PART_III
-      [receivePartTypes.PART_IV]: []    // Updated to PART_IV
+      [receivePartTypes.PART_I]: [],
+      [receivePartTypes.PART_II]: [],
+      [receivePartTypes.PART_III]: [],
+      [receivePartTypes.PART_IV]: []
     },
     [registerTypes.ISSUED]: []
   });
@@ -33,6 +33,17 @@ function App() {
   };
 
   const currentRecords = getCurrentRecords();
+
+  // Function to get next consecutive number
+  const getNextConsecutiveNumber = () => {
+    if (selectedRegister === registerTypes.RECEIVE) {
+      const partRecords = allRecords[selectedRegister]?.[selectedPart] || [];
+      return partRecords.length + 1;
+    } else {
+      const issuedRecords = allRecords[selectedRegister] || [];
+      return issuedRecords.length + 1;
+    }
+  };
 
   const handleCreateRecord = (newRecord) => {
     if (selectedRegister === registerTypes.RECEIVE) {
@@ -55,7 +66,7 @@ function App() {
     setSelectedRegister(register);
     // Reset to Part I when switching to Receive Register
     if (register === registerTypes.RECEIVE) {
-      setSelectedPart(receivePartTypes.PART_I); // Updated to PART_I
+      setSelectedPart(receivePartTypes.PART_I);
     }
   };
 
@@ -108,6 +119,8 @@ function App() {
       
       <CreateForm
         selectedRegister={selectedRegister}
+        selectedPart={selectedPart}
+        nextConsecutiveNumber={getNextConsecutiveNumber()}
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleCreateRecord}
