@@ -41,8 +41,7 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
         'Type of action',
         'Memo No.',
         'Dispatch Date',
-        'Endorsed To',
-        'Status' // Add Status column
+        'Endorsed To'
       ];
     } else if (selectedRegister === registerTypes.ISSUED) {
       return [
@@ -60,8 +59,7 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
         'Rs.',
         'P.',
         'Remarks',
-        'Name of the Officer.',
-        'Status' // Add Status column
+        'Name of the Officer.'
       ];
     }
     return [];
@@ -71,7 +69,6 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
 
   return (
     <>
-      {/* CSS for Landscape Printing */}
       {/* CSS for Landscape Printing */}
       <style>
         {`
@@ -114,23 +111,20 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
                       key={headerIndex}
                       rowSpan={header.rowspan || 1}
                       colSpan={header.colspan || 1}
-                      className={`border border-gray-300 px-3 py-2 text-center font-bold ${header.className || 'bg-gray-100'}`}
+                      // Removed 'bg-gray-100' and replaced with 'bg-white'
+                      className={`border border-gray-300 px-3 py-2 text-center font-bold bg-white`}
                     >
                       {header.name}
                     </th>
                   ))}
-                  {/* Add Status column header for the first row */}
-                  {rowIndex === 0 && (
-                    <th rowSpan={tableHeaders.length} className="border border-gray-300 px-3 py-2 text-center font-bold bg-gray-100">
-                      Status
-                    </th>
-                  )}
+
                 </tr>
               ))}
             </thead>
             <tbody>
               {records.map((record, index) => (
-                <tr key={record.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                // Removed alternating background colors logic
+                <tr key={record.id} className="bg-white">
                   {allColumns.map((columnName, colIndex) => {
                     const fieldName = fieldMappings[columnName];
 
@@ -155,10 +149,6 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
             No records to display
           </div>
         )}
-
-        <div className="mt-6 text-sm text-gray-600 text-right">
-          Page 1 of 1
-        </div>
       </div>
     </>
   );
