@@ -1,8 +1,9 @@
 // src/components/CreateForm.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { registerFields, registerTypes } from '../data/registerData';
 
 const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isOpen, onClose, onSubmit }) => {
+  
   // Initialize formData with empty values for current register fields
   const initializeFormData = () => {
     const fields = registerFields[selectedRegister] || [];
@@ -14,13 +15,32 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
   };
 
   const [formData, setFormData] = useState(initializeFormData());
+  const inputRefs = useRef({}); 
   
+  // Toast state
+  const [toast, setToast] = useState({ isVisible: false, message: '', isSuccess: true });
+
   // Reset form data when register changes
   useEffect(() => {
     if (isOpen) {
       setFormData(initializeFormData());
     }
   }, [selectedRegister, isOpen]);
+  
+  // Logic to hide the toast after a delay (2.5 seconds)
+  useEffect(() => {
+    if (toast.isVisible) {
+      const timer = setTimeout(() => {
+        setToast(prev => ({ ...prev, isVisible: false }));
+      }, 2500); // Vanishes after 2.5 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [toast.isVisible]);
+
+  const showToast = (message, isSuccess = true) => {
+    setToast({ isVisible: true, message, isSuccess });
+  };
+
 
   // Get fields for the currently selected register
   const fields = registerFields[selectedRegister] || [];
@@ -45,8 +65,12 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     console.log('Submitting record for', selectedRegister, ':', recordWithDefaults);
     
     onSubmit(recordWithDefaults);
+    
     setFormData(initializeFormData());
     onClose();
+
+    // Show toast notification on successful creation
+    showToast(`${selectedRegister.replace(' Register', '')} Record #${nextConsecutiveNumber} created successfully!`);
   };
 
   const handleClose = () => {
@@ -56,7 +80,9 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
 
   const renderField = (field) => {
     const value = formData[field.name] || '';
-    const commonClasses = "w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 bg-white";
+    
+    // Premium commonClasses 
+    const commonClasses = "w-full px-3 py-2.5 border border-gray-300 rounded-lg transition-all duration-300 bg-white hover:border-slate-400 hover:shadow-sm focus:border-slate-600 focus:shadow-lg focus:shadow-slate-300/50 focus:outline-none";
     
     switch (field.type) {
       case 'textarea':
@@ -71,27 +97,49 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
         );
       case 'select':
         return (
-          <select
-            value={value}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            className={`${commonClasses} appearance-none bg-white`}
-          >
-            <option value="">Select {field.label}</option>
-            {field.options.map(option => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={value}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              className={`${commonClasses} appearance-none pr-10 cursor-pointer`} 
+            >
+              <option value="">Select {field.label}</option>
+              {field.options.map(option => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            {/* Custom Arrow Icon */}
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg className="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
         );
       case 'date':
         return (
-          <input
-            type="date"
-            value={value}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            className={commonClasses}
-          />
+          <div 
+            className="relative"
+            onClick={() => {
+              const el = inputRefs.current[field.name];
+              if (el) {
+                // Trigger input's native date picker (works on wrapper click)
+                el.showPicker ? el.showPicker() : el.click();
+              }
+            }} 
+          >
+            <input
+              ref={el => inputRefs.current[field.name] = el}
+              type="date"
+              value={value}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              onMouseDown={(e) => e.preventDefault()} 
+              className={`${commonClasses} appearance-none pr-10 cursor-pointer select-none`} 
+            />
+            
+          </div>
         );
       case 'number':
         return (
@@ -116,18 +164,17 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     }
   };
 
-  if (!isOpen) return null;
-
-  return (
+  // Define modal JSX content structure.
+  const modalContentJSX = (
     <>
       {/* Backdrop with blur */}
       <div className="fixed inset-0 bg-white bg-opacity-10 backdrop-blur-md z-40"></div>
       
-      {/* Modal */}
+      {/* Modal Container */}
       <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="bg-slate-700 px-6 py-4 rounded-t-lg sticky top-0">
+          <div className="bg-slate-700 px-6 py-4 rounded-t-lg sticky top-0 z-20"> 
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-xl font-semibold text-white">
@@ -140,7 +187,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
               </div>
               <button
                 onClick={handleClose}
-                className="text-slate-200 hover:text-white transition-colors p-1 rounded-full hover:bg-slate-600"
+                className="text-slate-200 hover:text-white transition-colors p-1 rounded-full hover:bg-slate-600 cursor-pointer"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -233,6 +280,48 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
           </form>
         </div>
       </div>
+    </>
+  );
+
+  // Toast Notification Component
+  const ToastNotification = () => {
+    // Positioned fixed top-5 right-5
+    const baseClasses = "fixed top-5 right-5 max-w-sm w-full shadow-lg rounded-xl pointer-events-auto ring-1 ring-black ring-opacity-5 transition-all duration-500 ease-in-out z-[100] p-4 flex items-center";
+    
+    // Success colors
+    const successBg = "bg-emerald-500";
+    const successRing = "ring-emerald-600";
+    const successText = "text-white";
+    const successIcon = "✅";
+
+    // Dynamic classes for right-side animation
+    const activeClasses = `opacity-100 translate-x-0 ${successBg} ${successRing}`;
+    const inactiveClasses = `opacity-0 translate-x-full ${successBg} ${successRing}`; // Starts off-screen to the right
+
+    return (
+      <div 
+        aria-live="assertive" 
+        className={`${baseClasses} ${toast.isVisible ? activeClasses : inactiveClasses}`}
+      >
+        <div className="flex-shrink-0">
+          <span className="text-xl">{successIcon}</span>
+        </div>
+        <div className="ml-3 flex-1">
+          <p className={`text-sm font-medium ${successText}`}>
+            {toast.message}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {/* Only render the modal content if the `isOpen` prop is true */}
+      {isOpen && modalContentJSX}
+      
+      {/* Toast is always rendered so it can persist after the modal unmounts */}
+      <ToastNotification />
     </>
   );
 };
