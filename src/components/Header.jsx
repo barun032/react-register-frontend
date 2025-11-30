@@ -8,7 +8,7 @@ const Header = ({ selectedRegister, selectedPart, onRegisterChange, onPartChange
       case registerTypes.RECEIVE:
         return 'Create Receive';
       case registerTypes.ISSUED:
-        return 'Create Issued';
+        return 'Create Dispatch';
       default:
         return 'Create';
     }

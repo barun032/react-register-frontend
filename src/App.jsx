@@ -45,19 +45,22 @@ function App() {
     }
   };
 
-  const handleCreateRecord = (newRecord) => {
+ const handleCreateRecord = (newRecord) => {
     if (selectedRegister === registerTypes.RECEIVE) {
       setAllRecords(prev => ({
         ...prev,
         [selectedRegister]: {
           ...prev[selectedRegister],
+          // You already had the safety check here: || []
           [selectedPart]: [...(prev[selectedRegister]?.[selectedPart] || []), newRecord]
         }
       }));
     } else {
+      // This is the Dispatch/Issued Logic
       setAllRecords(prev => ({
         ...prev,
-        [selectedRegister]: [...prev[selectedRegister], newRecord]
+        // FIX: Add '|| []' to handle cases where this register doesn't exist in storage yet
+        [selectedRegister]: [...(prev[selectedRegister] || []), newRecord]
       }));
     }
   };

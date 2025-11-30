@@ -1,15 +1,16 @@
 // src/components/CreateForm.js
 import React, { useState, useEffect, useRef } from 'react';
-import { registerFields, registerTypes } from '../data/registerData';
+import { registerFieldGroups, registerTypes } from '../data/registerData';
 
 const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isOpen, onClose, onSubmit }) => {
   
-  // Initialize formData with empty values for current register fields
   const initializeFormData = () => {
-    const fields = registerFields[selectedRegister] || [];
+    const fieldGroups = registerFieldGroups[selectedRegister] || [];
     const initialData = {};
-    fields.forEach(field => {
-      initialData[field.name] = '';
+    fieldGroups.forEach(group => {
+      group.fields.forEach(field => {
+        initialData[field.name] = '';
+      });
     });
     return initialData;
   };
@@ -17,33 +18,41 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
   const [formData, setFormData] = useState(initializeFormData());
   const inputRefs = useRef({}); 
   
-  // Toast state
-  const [toast, setToast] = useState({ isVisible: false, message: '', isSuccess: true });
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: '',
+    isSuccess: true
+  });
 
-  // Reset form data when register changes
+  // ---------------------------------------------------------
+  // ✅ ADD THIS EFFECT HERE
+  // This ensures that when you switch from RECEIVE to ISSUED,
+  // the old keys ('from', 'referenceNo') are wiped out.
+  // ---------------------------------------------------------
   useEffect(() => {
     if (isOpen) {
       setFormData(initializeFormData());
     }
-  }, [selectedRegister, isOpen]);
-  
-  // Logic to hide the toast after a delay (2.5 seconds)
+  }, [selectedRegister, isOpen]); 
+  // ---------------------------------------------------------
+
+  // Logic to hide the toast after a delay
   useEffect(() => {
+    let timer;
     if (toast.isVisible) {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         setToast(prev => ({ ...prev, isVisible: false }));
-      }, 2500); // Vanishes after 2.5 seconds
-      return () => clearTimeout(timer);
+      }, 2500);
     }
+    return () => clearTimeout(timer);
   }, [toast.isVisible]);
 
   const showToast = (message, isSuccess = true) => {
     setToast({ isVisible: true, message, isSuccess });
   };
 
-
-  // Get fields for the currently selected register
-  const fields = registerFields[selectedRegister] || [];
+  const fieldGroups = registerFieldGroups[selectedRegister] || [];
+  const allFields = fieldGroups.flatMap(group => group.fields);
 
   const handleInputChange = (fieldName, value) => {
     setFormData(prev => ({
@@ -55,21 +64,20 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Create the record with all form data and consecutive number as ID
+    // Now this will only contain keys for the current register
     const recordWithDefaults = { 
-      id: nextConsecutiveNumber.toString(), // Use consecutive number as ID
+      id: nextConsecutiveNumber.toString(),
       status: 'Pending',
       ...formData
     };
     
     console.log('Submitting record for', selectedRegister, ':', recordWithDefaults);
-    
     onSubmit(recordWithDefaults);
     
+    // Reset and close
     setFormData(initializeFormData());
     onClose();
 
-    // Show toast notification on successful creation
     showToast(`${selectedRegister.replace(' Register', '')} Record #${nextConsecutiveNumber} created successfully!`);
   };
 
@@ -80,8 +88,6 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
 
   const renderField = (field) => {
     const value = formData[field.name] || '';
-    
-    // Premium commonClasses 
     const commonClasses = "w-full px-3 py-2.5 border border-gray-300 rounded-lg transition-all duration-300 bg-white hover:border-slate-400 hover:shadow-sm focus:border-slate-600 focus:shadow-lg focus:shadow-slate-300/50 focus:outline-none";
     
     switch (field.type) {
@@ -110,9 +116,8 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
                 </option>
               ))}
             </select>
-            {/* Custom Arrow Icon */}
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg className="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg className="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"></path>
               </svg>
             </div>
@@ -124,10 +129,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
             className="relative"
             onClick={() => {
               const el = inputRefs.current[field.name];
-              if (el) {
-                // Trigger input's native date picker (works on wrapper click)
-                el.showPicker ? el.showPicker() : el.click();
-              }
+              if (el) el.showPicker ? el.showPicker() : el.click();
             }} 
           >
             <input
@@ -138,7 +140,6 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
               onMouseDown={(e) => e.preventDefault()} 
               className={`${commonClasses} appearance-none pr-10 cursor-pointer select-none`} 
             />
-            
           </div>
         );
       case 'number':
@@ -164,16 +165,11 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     }
   };
 
-  // Define modal JSX content structure.
   const modalContentJSX = (
     <>
-      {/* Backdrop with blur */}
       <div className="fixed inset-0 bg-white bg-opacity-10 backdrop-blur-md z-40"></div>
-      
-      {/* Modal Container */}
       <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-          {/* Header */}
           <div className="bg-slate-700 px-6 py-4 rounded-t-lg sticky top-0 z-20"> 
             <div className="flex justify-between items-center">
               <div>
@@ -183,12 +179,8 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
                 <p className="text-slate-200 text-sm mt-1">
                   Fill in the details below to create a new {selectedRegister.replace(' Register', '').toLowerCase()} record
                 </p>
-                
               </div>
-              <button
-                onClick={handleClose}
-                className="text-slate-200 hover:text-white transition-colors p-1 rounded-full hover:bg-slate-600 cursor-pointer"
-              >
+              <button onClick={handleClose} className="text-slate-200 hover:text-white transition-colors p-1 rounded-full hover:bg-slate-600 cursor-pointer">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -196,23 +188,12 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
             </div>
           </div>
           
-          {/* Form */}
           <form onSubmit={handleSubmit} className="p-6">
-            
-
-            {/* Consecutive Number Field - Read Only */}
             <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Consecutive No.
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Consecutive No.</label>
                 <div className="flex items-center space-x-3">
-                  <input
-                    type="text"
-                    value={nextConsecutiveNumber}
-                    readOnly
-                    className="w-24 px-3 py-2.5 border border-slate-300 rounded-lg bg-slate-100 text-slate-700 font-mono font-bold text-center"
-                  />
+                  <input type="text" value={nextConsecutiveNumber} readOnly className="w-24 px-3 py-2.5 border border-slate-300 rounded-lg bg-slate-100 text-slate-700 font-mono font-bold text-center" />
                   <span className="text-sm text-slate-600">
                     {selectedRegister === registerTypes.RECEIVE && selectedPart 
                       ? `This will be record #${nextConsecutiveNumber} in ${selectedPart}`
@@ -220,62 +201,40 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
                     }
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Consecutive number is automatically generated and cannot be edited
-                </p>
+                <p className="text-xs text-slate-500 mt-1">Consecutive number is automatically generated and cannot be edited</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {fields.map((field) => {
-                const isTextarea = field.type === 'textarea';
-                
-                return (
-                  <div 
-                    key={field.name} 
-                    className={`space-y-2 ${isTextarea ? 'md:col-span-2' : ''}`}
-                  >
-                    <label className="block text-sm font-medium text-gray-700">
-                      {field.label} {field.required && <span className="text-red-500">*</span>}
-                    </label>
-                    {renderField(field)}
-                    {field.description && (
-                      <p className="text-xs text-gray-500 mt-1">{field.description}</p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Show message if no fields are available */}
-            {fields.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                  <span className="text-2xl">⚠️</span>
+            {fieldGroups.map((group, groupIndex) => (
+              <div key={group.title} className="mb-6">
+                <h3 className={`text-lg font-semibold text-slate-700 mb-4 pb-2 border-b-2 ${groupIndex > 0 ? 'mt-6 border-slate-200' : 'border-slate-700'}`}>
+                  {group.title}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {group.fields.map((field) => {
+                    const isTextarea = field.type === 'textarea';
+                    return (
+                      <div key={field.name} className={`space-y-2 ${isTextarea ? 'md:col-span-2' : ''}`}>
+                        <label className="block text-sm font-medium text-gray-700">
+                          {field.label} {field.required && <span className="text-red-500">*</span>}
+                        </label>
+                        {renderField(field)}
+                      </div>
+                    );
+                  })}
                 </div>
-                <h3 className="text-base font-medium text-gray-900 mb-2">No form fields configured</h3>
-                <p className="text-gray-600">
-                  No form fields are defined for {selectedRegister}. Please check the register configuration.
-                </p>
+              </div>
+            ))}
+
+            {allFields.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                 <h3 className="text-base font-medium text-gray-900 mb-2">No form fields configured</h3>
               </div>
             )}
             
-            {/* Form Actions */}
             <div className="flex gap-3 pt-6 mt-6 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={fields.length === 0}
-                className="flex-1 px-4 py-2.5 bg-slate-700 text-white rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                Create Record
-              </button>
+              <button type="button" onClick={handleClose} className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium">Cancel</button>
+              <button type="submit" disabled={allFields.length === 0} className="flex-1 px-4 py-2.5 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors duration-200 font-medium disabled:bg-gray-400">Create Record</button>
             </div>
           </form>
         </div>
@@ -283,44 +242,22 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     </>
   );
 
-  // Toast Notification Component
   const ToastNotification = () => {
-    // Positioned fixed top-5 right-5
     const baseClasses = "fixed top-5 right-5 max-w-sm w-full shadow-lg rounded-xl pointer-events-auto ring-1 ring-black ring-opacity-5 transition-all duration-500 ease-in-out z-[100] p-4 flex items-center";
-    
-    // Success colors
-    const successBg = "bg-emerald-500";
-    const successRing = "ring-emerald-600";
-    const successText = "text-white";
-    const successIcon = "✅";
-
-    // Dynamic classes for right-side animation
-    const activeClasses = `opacity-100 translate-x-0 ${successBg} ${successRing}`;
-    const inactiveClasses = `opacity-0 translate-x-full ${successBg} ${successRing}`; // Starts off-screen to the right
+    const activeClasses = `opacity-100 translate-x-0 bg-emerald-500 ring-emerald-600`;
+    const inactiveClasses = `opacity-0 translate-x-full bg-emerald-500 ring-emerald-600`;
 
     return (
-      <div 
-        aria-live="assertive" 
-        className={`${baseClasses} ${toast.isVisible ? activeClasses : inactiveClasses}`}
-      >
-        <div className="flex-shrink-0">
-          <span className="text-xl">{successIcon}</span>
-        </div>
-        <div className="ml-3 flex-1">
-          <p className={`text-sm font-medium ${successText}`}>
-            {toast.message}
-          </p>
-        </div>
+      <div className={`${baseClasses} ${toast.isVisible ? activeClasses : inactiveClasses}`}>
+        <div className="flex-shrink-0"><span className="text-xl">✅</span></div>
+        <div className="ml-3 flex-1"><p className="text-sm font-medium text-white">{toast.message}</p></div>
       </div>
     );
   };
 
   return (
     <>
-      {/* Only render the modal content if the `isOpen` prop is true */}
       {isOpen && modalContentJSX}
-      
-      {/* Toast is always rendered so it can persist after the modal unmounts */}
       <ToastNotification />
     </>
   );

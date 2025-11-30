@@ -70,7 +70,8 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
         'No. & title of collection',   // Sub-header under 'Where the draft is placed'
         'No. of file within the collection', // Sub-header under 'Where the draft is placed'
         'No. and date of reply receive',
-        'Receive Register Ref.',
+        'Part No.',
+        'Ref No.',
         'Reminder No.',                // Sub-header under 'Reminder'
         'Reminder Date',               // Sub-header under 'Reminder'
         'Rs.',                         // Sub-header under 'Value of Stamp.'
@@ -199,7 +200,7 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
           
           {/* Empty State */}
           {records.length === 0 && (
-            <div className="text-center py-12 px-6 border border-gray-200 border-t-0">
+            <div className="text-center py-12 px-6 border-gray-200 border-t-0">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                 <span className="text-2xl">📝</span>
               </div>
