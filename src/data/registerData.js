@@ -1,7 +1,7 @@
 // src/data/registerData.js
 export const registerTypes = {
   RECEIVE: 'Receive Register',
-  ISSUED: 'Issued Register'
+  ISSUED: 'Dispatch Register'
 };
 
 // Update part types for Receive Register to Roman numerals
@@ -50,7 +50,7 @@ export const registerTableHeaders = {
       { name: 'Short subject', rowspan: 2 },
       { name: 'Where the draft is placed', colspan: 3 },
       { name: 'No. and date of reply receive', rowspan: 2 },
-      { name: 'Receive Register Ref.', rowspan: 2 },
+      { name: 'Receive Register Ref.', colspan: 2 },
       { name: 'Reminder', colspan: 2 },
       { name: 'Value of Stamp.', colspan: 2 },
       { name: 'Remarks', rowspan: 2 },
@@ -61,6 +61,8 @@ export const registerTableHeaders = {
       { name: 'File No. & Serial No.' },
       { name: 'No. & title of collection' },
       { name: 'No. of file within the collection' },
+      {name: 'Part No.'},
+      {name: 'Ref No.'},
       { name: 'Reminder No.' },
       { name: 'Reminder Date' },
       { name: 'Rs.' },
@@ -90,22 +92,23 @@ export const registerFieldMappings = {
     'Endorsed To': 'endorsedTo'
   },
   [registerTypes.ISSUED]: {
-    'Consecutive No.': 'id',
-    'Date': 'date',
-    'To whom addressed': 'to',
-    'Short subject': 'subject',
-    'File No. & Serial No.': 'fileSerialNo',
-    'No. & title of collection': 'collectionTitle',
-    'No. of file within the collection': 'fileInCollection',
-    'No. and date of reply receive': 'replyDetails',
-    'Receive Register Ref.': 'receiveRef',
-    'Reminder No.': 'reminderNumber',
-    'Reminder Date': 'reminderDate',
-    'Rs.': 'stampRupees',
-    'P.': 'stampPaise',
-    'Remarks': 'remarks',
-    'Name of the Officer.': 'officerName'
-  }
+  'Consecutive No.': 'id',
+  'Date': 'date',
+  'To whom addressed': 'to',
+  'Short subject': 'subject',
+  'File No. & Serial No.': 'fileSerialNo',
+  'No. & title of collection': 'collectionTitle',
+  'No. of file within the collection': 'fileInCollection',
+  'No. and date of reply receive': 'replyDetails',
+  'Part No.': 'receiveRefPart',
+  'Ref No.': 'receiveRefNo',
+  'Reminder No.': 'reminderNumber',
+  'Reminder Date': 'reminderDate',
+  'Rs.': 'stampRupees',
+  'P.': 'stampPaise',
+  'Remarks': 'remarks',
+  'Name of the Officer.': 'officerName'
+}
 };
 
 // Updated form fields to match the table structure exactly
@@ -146,7 +149,6 @@ export const registerFields = {
     }
   ],
   [registerTypes.ISSUED]: [
-    // Note: 'Consecutive No.' is auto-generated as 'id', so it's not in the form
     { name: 'date', label: 'Date', type: 'date', required: true },
     { name: 'to', label: 'To whom addressed', type: 'text', required: true },
     { name: 'subject', label: 'Short subject', type: 'textarea', rows: 3, required: true },
@@ -154,22 +156,34 @@ export const registerFields = {
     { name: 'collectionTitle', label: 'No. & title of collection', type: 'text' },
     { name: 'fileInCollection', label: 'No. of file within the collection', type: 'text' },
     { name: 'replyDetails', label: 'No. and date of reply receive', type: 'text' },
-    { name: 'receiveRef', label: 'Receive Register Ref.', type: 'text' },
+
+    // REPLACE the single field with TWO proper fields
+    {
+      name: 'receiveRefPart',
+      label: 'Receive Register Part',
+      type: 'select',
+      options: Object.values(receivePartTypes), // ['Part I', 'Part II', ...]
+      required: false,
+      description: 'Select the part of Receive Register this dispatch replies to'
+    },
+    {
+      name: 'receiveRefNo',
+      label: 'Receive Register Ref. No.',
+      type: 'number',
+      required: false,
+      description: 'Enter the Consecutive No. from the selected Receive Register Part'
+    },
+
     { name: 'reminderNumber', label: 'Reminder Number', type: 'text' },
     { name: 'reminderDate', label: 'Reminder Date', type: 'date' },
     { name: 'stampRupees', label: 'Stamp Value (Rs.)', type: 'number', min: 0 },
     { name: 'stampPaise', label: 'Stamp Value (P.)', type: 'number', min: 0, max: 99 },
     { name: 'remarks', label: 'Remarks', type: 'textarea' },
-    { 
-      name: 'officerName', 
-      label: 'Name of the Officer', 
+    {
+      name: 'officerName',
+      label: 'Name of the Officer',
       type: 'select',
-      options: [
-        'Rupali Santra',
-        'Bikash Sen',
-        'Sadhana Singha', 
-        'Ummey Salma',
-      ],
+      options: ['Rupali Santra', 'Bikash Sen', 'Sadhana Singha', 'Ummey Salma'],
       required: true
     }
   ]

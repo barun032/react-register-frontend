@@ -36,29 +36,27 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
     }
   };
 
-  // 🐛 FIX: This function is the root cause of the issue. 
-  // It must return all column names in the correct display order, 
-  // including the 'rowspan: 2' headers from Row 1, and the implicit 'Status' column.
-  const getAllColumnNames = () => {
+ 
+   const getAllColumnNames = () => {
     if (selectedRegister === registerTypes.RECEIVE) {
       return [
         'Consecutive No.',
         'Date of receipt in office',
-        'From whom received', // Sub-header under 'Letter etc.'
-        'Reference Number',   // Sub-header under 'Letter etc.'
-        'Reference Date',     // Sub-header under 'Letter etc.'
+        'From whom received',
+        'Reference Number',
+        'Reference Date',
         'Short subject',
-        'Reminder Number',    // Sub-header under 'Remainders'
-        'Reminder Date',      // Sub-header under 'Remainders'
-        'File No.',           // Sub-header under 'Where the letter is placed'
-        'Sl. No.',            // Sub-header under 'Where the letter is placed'
-        'No. of the Collection', // Sub-header under 'Where the letter is placed'
-        'No. of the file within the collection', // Sub-header under 'Where the letter is placed'
+        'Reminder Number',
+        'Reminder Date',
+        'File No.',
+        'Sl. No.',
+        'No. of the Collection',
+        'No. of the file within the collection',
         'Type of action',
-        'Memo No.',           // Sub-header under 'Dispatch Register'
-        'Dispatch Date',      // Sub-header under 'Dispatch Register'
+        'Memo No.',
+        'Dispatch Date',
         'Endorsed To',
-        'Status' // The implicitly required column for status display
+        'Status'
       ];
     } else if (selectedRegister === registerTypes.ISSUED) {
       return [
@@ -66,24 +64,24 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
         'Date',
         'To whom addressed',
         'Short subject',
-        'File No. & Serial No.',       // Sub-header under 'Where the draft is placed'
-        'No. & title of collection',   // Sub-header under 'Where the draft is placed'
-        'No. of file within the collection', // Sub-header under 'Where the draft is placed'
+        'File No. & Serial No.',
+        'No. & title of collection',
+        'No. of file within the collection',
         'No. and date of reply receive',
-        'Receive Register Ref.',
-        'Reminder No.',                // Sub-header under 'Reminder'
-        'Reminder Date',               // Sub-header under 'Reminder'
-        'Rs.',                         // Sub-header under 'Value of Stamp.'
-        'P.',                          // Sub-header under 'Value of Stamp.'
+        'Part No.',           // FIXED: Now included
+        'Ref No.',            // FIXED: Now included
+        'Reminder No.',
+        'Reminder Date',
+        'Rs.',
+        'P.',
         'Remarks',
         'Name of the Officer.',
-        'Status' // The implicitly required column for status display
+        'Status'
       ];
     }
     
     return [];
   };
-
   const allColumns = getAllColumnNames();
 
   return (
@@ -182,6 +180,23 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
                         </td>
                       );
                     }
+                      if (columnName === 'Part No.') {
+                      return (
+                        <td key={colIndex} className="px-4 py-3 text-center border border-gray-200 text-xs font-medium text-gray-600">
+                          {value || '—'}
+                        </td>
+                      );
+                    }
+
+                    if (columnName === 'Ref No.') {
+                      return (
+                        <td key={colIndex} className="px-4 py-3 text-center border border-gray-200 font-medium">
+                          <span className="inline-block px-3 py-1 text-xs font-mono font-bold text-slate-800 bg-slate-100 rounded border border-slate-300">
+                            {value || '—'}
+                          </span>
+                        </td>
+                      );
+                    }
                     
                     return (
                       <td
@@ -199,7 +214,7 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
           
           {/* Empty State */}
           {records.length === 0 && (
-            <div className="text-center py-12 px-6 border border-gray-200 border-t-0">
+            <div className="text-center py-12 px-6 border-gray-200 border-t-0">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                 <span className="text-2xl">📝</span>
               </div>
