@@ -102,10 +102,16 @@ function App() {
 
     // 2. Update the allRecords state immutably
     setAllRecords(prevRecords => {
-      // Create a mutable copy of the overall state for easier manipulation
       const updatedRecords = {
         ...prevRecords,
-        [registerTypes.RECEIVE]: { ...prevRecords[registerTypes.RECEIVE] }
+        [registerTypes.RECEIVE]: {
+          ...prevRecords[registerTypes.RECEIVE],
+          [receivePartTypes.PART_I]: [...(prevRecords[registerTypes.RECEIVE]?.[receivePartTypes.PART_I] || [])],
+          [receivePartTypes.PART_II]: [...(prevRecords[registerTypes.RECEIVE]?.[receivePartTypes.PART_II] || [])],
+          [receivePartTypes.PART_III]: [...(prevRecords[registerTypes.RECEIVE]?.[receivePartTypes.PART_III] || [])],
+          [receivePartTypes.PART_IV]: [...(prevRecords[registerTypes.RECEIVE]?.[receivePartTypes.PART_IV] || [])]
+        },
+        [registerTypes.ISSUED]: [...(prevRecords[registerTypes.ISSUED] || [])]  // ← FIXED!
       };
 
       if (selectedRegister === registerTypes.RECEIVE) {
