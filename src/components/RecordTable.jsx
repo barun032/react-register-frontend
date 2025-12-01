@@ -68,12 +68,11 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
         'No. & title of collection',
         'No. of file within the collection',
         'No. and date of reply receive',
-        'Part No.',           // FIXED: Now included
-        'Ref No.',            // FIXED: Now included
-        'Reminder No.',
-        'Reminder Date',
-        'Rs.',
-        'P.',
+        'Receive Register Ref.',
+        'Reminder No.',                // Sub-header under 'Reminder'
+        'Reminder Date',               // Sub-header under 'Reminder'
+        'Rs.',                         // Sub-header under 'Value of Stamp.'
+        'P.',                          // Sub-header under 'Value of Stamp.'
         'Remarks',
         'Name of the Officer.',
         'Status'

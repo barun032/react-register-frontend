@@ -61,8 +61,6 @@ export const registerTableHeaders = {
       { name: 'File No. & Serial No.' },
       { name: 'No. & title of collection' },
       { name: 'No. of file within the collection' },
-      {name: 'Part No.'},
-      {name: 'Ref No.'},
       { name: 'Reminder No.' },
       { name: 'Reminder Date' },
       { name: 'Rs.' },
@@ -92,23 +90,22 @@ export const registerFieldMappings = {
     'Endorsed To': 'endorsedTo'
   },
   [registerTypes.ISSUED]: {
-  'Consecutive No.': 'id',
-  'Date': 'date',
-  'To whom addressed': 'to',
-  'Short subject': 'subject',
-  'File No. & Serial No.': 'fileSerialNo',
-  'No. & title of collection': 'collectionTitle',
-  'No. of file within the collection': 'fileInCollection',
-  'No. and date of reply receive': 'replyDetails',
-  'Part No.': 'receiveRefPart',
-  'Ref No.': 'receiveRefNo',
-  'Reminder No.': 'reminderNumber',
-  'Reminder Date': 'reminderDate',
-  'Rs.': 'stampRupees',
-  'P.': 'stampPaise',
-  'Remarks': 'remarks',
-  'Name of the Officer.': 'officerName'
-}
+    'Consecutive No.': 'id',
+    'Date': 'date',
+    'To whom addressed': 'to',
+    'Short subject': 'subject',
+    'File No. & Serial No.': 'fileSerialNo',
+    'No. & title of collection': 'collectionTitle',
+    'No. of file within the collection': 'fileInCollection',
+    'No. and date of reply receive': 'replyDetails',
+    'Receive Register Ref.': 'receiveRef',
+    'Reminder No.': 'reminderNumber',
+    'Reminder Date': 'reminderDate',
+    'Rs.': 'stampRupees',
+    'P.': 'stampPaise',
+    'Remarks': 'remarks',
+    'Name of the Officer.': 'officerName'
+  }
 };
 
 // Updated form fields to match the table structure exactly
@@ -185,6 +182,117 @@ export const registerFields = {
       type: 'select',
       options: ['Rupali Santra', 'Bikash Sen', 'Sadhana Singha', 'Ummey Salma'],
       required: true
+    }
+  ]
+};
+
+export const registerFieldGroups = {
+  [registerTypes.RECEIVE]: [
+    {
+      title: 'Core Receipt Details (Letter etc.)',
+      fields: [
+        { name: 'date', label: 'Date of receipt in office', type: 'date', required: true },
+        { name: 'from', label: 'From whom received', type: 'text', required: true },
+        { name: 'referenceNo', label: 'Reference Number', type: 'text' },
+        { name: 'referenceDate', label: 'Reference Date', type: 'date' },
+        { name: 'subject', label: 'Short subject', type: 'textarea', rows: 3, required: true },
+      ]
+    },
+    {
+      title: 'Reminder Details',
+      fields: [
+        { name: 'reminderNumber', label: 'Reminder Number', type: 'text' },
+        { name: 'reminderDate', label: 'Reminder Date', type: 'date' },
+      ]
+    },
+    {
+      title: 'File Placement Details (Where the letter is placed)',
+      fields: [
+        { name: 'fileNo', label: 'File No.', type: 'text' },
+        { name: 'serialNo', label: 'Sl. No.', type: 'text' },
+        { name: 'collectionNumber', label: 'No. of the Collection', type: 'text' },
+        { name: 'fileInCollection', label: 'No. of file within the collection', type: 'text' },
+      ]
+    },
+    {
+      title: 'Action & Dispatch Details',
+      fields: [
+        { 
+          name: 'actionType', 
+          label: 'Type of action', 
+          type: 'select', 
+          options: ['Returnable', 'Not Returnable', 'Attached to File'],
+          required: true
+        },
+        { name: 'dispatchMemoNo', label: 'Dispatch Memo No.', type: 'text' },
+        { name: 'dispatchDate', label: 'Dispatch Date', type: 'date' },
+        { 
+          name: 'endorsedTo', 
+          label: 'Endorsed To', 
+          type: 'select', 
+          options: ['SI Rupali Santra', 'SI Bikash Sen', 'SI Sadhana Singha', 'SI Ummey Salma'],
+          required: true
+        }
+      ]
+    }
+  ],
+  [registerTypes.ISSUED]: [
+    {
+      title: 'Core Dispatch Details',
+      fields: [
+        { name: 'date', label: 'Date', type: 'date', required: true },
+        { name: 'to', label: 'To whom addressed', type: 'text', required: true },
+        { name: 'subject', label: 'Short subject', type: 'textarea', rows: 3, required: true },
+      ]
+    },
+    {
+      title: 'File Placement Details (Where the draft is placed)',
+      fields: [
+        { name: 'fileSerialNo', label: 'File No. & Serial No.', type: 'text' },
+        { name: 'collectionTitle', label: 'No. & title of collection', type: 'text' },
+        { name: 'fileInCollection', label: 'No. of file within the collection', type: 'text' },
+      ]
+    },
+    {
+      title: 'Reply & Receive Reference',
+      fields: [
+        { name: 'replyDetails', label: 'No. and date of reply receive', type: 'text' },
+        { name: 'receiveRef', label: 'Receive Register Ref.', type: 'text' },
+        { 
+          name: 'ReplyPartNo', 
+          label: 'Part No.', 
+          type: 'select', 
+          options: ['I', 'II', 'III', 'IV'],
+          required: true
+        }
+      ]
+    },
+    {
+      title: 'Reminder Details',
+      fields: [
+        { name: 'reminderNumber', label: 'Reminder Number', type: 'text' },
+        { name: 'reminderDate', label: 'Reminder Date', type: 'date' },
+      ]
+    },
+    {
+      title: 'Stamp Value',
+      fields: [
+        { name: 'stampRupees', label: 'Stamp Value (Rs.)', type: 'number', min: 0 },
+        { name: 'stampPaise', label: 'Stamp Value (P.)', type: 'number', min: 0, max: 99 },
+      ]
+    },
+    {
+      title: 'Finalization',
+      fields: [
+        { 
+          name: 'officerName', 
+          label: 'Name of the Officer', 
+          type: 'select',
+          options: ['SI Rupali Santra', 'SI Bikash Sen', 'SI Sadhana Singha', 'SI Ummey Salma'],
+          required: true
+        },
+        { name: 'remarks', label: 'Remarks', type: 'textarea' }
+      ]
     }
   ]
 };

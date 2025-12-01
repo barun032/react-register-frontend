@@ -34,21 +34,34 @@ function App() {
 
   const currentRecords = getCurrentRecords();
 
-  // Helper to calculate the next consecutive ID
-  const getNextConsecutiveNumber = (register, part) => {
-    let records = [];
-    if (register === registerTypes.RECEIVE) {
-      records = allRecords[register]?.[part] || [];
-    } else if (register === registerTypes.ISSUED) {
-      records = allRecords[register] || [];
+  // Function to get next consecutive number
+  const getNextConsecutiveNumber = () => {
+    if (selectedRegister === registerTypes.RECEIVE) {
+      const partRecords = allRecords[selectedRegister]?.[selectedPart] || [];
+      return partRecords.length + 1;
+    } else {
+      const issuedRecords = allRecords[selectedRegister] || [];
+      return issuedRecords.length + 1;
     }
-
-    // Find the max ID and increment, default to 1 if no records
-    const maxId = records.reduce((max, record) => Math.max(max, record.id || 0), 0);
-    return maxId + 1;
   };
 
-  // HANDLERS for UI state changes
+  const handleCreateRecord = (newRecord) => {
+    if (selectedRegister === registerTypes.RECEIVE) {
+      setAllRecords(prev => ({
+        ...prev,
+        [selectedRegister]: {
+          ...prev[selectedRegister],
+          [selectedPart]: [...(prev[selectedRegister]?.[selectedPart] || []), newRecord]
+        }
+      }));
+    } else {
+      setAllRecords(prev => ({
+        ...prev,
+        [selectedRegister]: [...prev[selectedRegister], newRecord]
+      }));
+    }
+  };
+
   const handleRegisterChange = (register) => {
     setSelectedRegister(register);
     if (register === registerTypes.RECEIVE) {
