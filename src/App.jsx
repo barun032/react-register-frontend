@@ -34,34 +34,21 @@ function App() {
 
   const currentRecords = getCurrentRecords();
 
-  // Function to get next consecutive number
-  const getNextConsecutiveNumber = () => {
-    if (selectedRegister === registerTypes.RECEIVE) {
-      const partRecords = allRecords[selectedRegister]?.[selectedPart] || [];
-      return partRecords.length + 1;
-    } else {
-      const issuedRecords = allRecords[selectedRegister] || [];
-      return issuedRecords.length + 1;
+  // Helper to calculate the next consecutive ID
+  const getNextConsecutiveNumber = (register, part) => {
+    let records = [];
+    if (register === registerTypes.RECEIVE) {
+      records = allRecords[register]?.[part] || [];
+    } else if (register === registerTypes.ISSUED) {
+      records = allRecords[register] || [];
     }
+
+    // Find the max ID and increment, default to 1 if no records
+    const maxId = records.reduce((max, record) => Math.max(max, record.id || 0), 0);
+    return maxId + 1;
   };
 
-  const handleCreateRecord = (newRecord) => {
-    if (selectedRegister === registerTypes.RECEIVE) {
-      setAllRecords(prev => ({
-        ...prev,
-        [selectedRegister]: {
-          ...prev[selectedRegister],
-          [selectedPart]: [...(prev[selectedRegister]?.[selectedPart] || []), newRecord]
-        }
-      }));
-    } else {
-      setAllRecords(prev => ({
-        ...prev,
-        [selectedRegister]: [...prev[selectedRegister], newRecord]
-      }));
-    }
-  };
-
+  // HANDLERS for UI state changes
   const handleRegisterChange = (register) => {
     setSelectedRegister(register);
     if (register === registerTypes.RECEIVE) {
@@ -102,16 +89,10 @@ function App() {
 
     // 2. Update the allRecords state immutably
     setAllRecords(prevRecords => {
+      // Create a mutable copy of the overall state for easier manipulation
       const updatedRecords = {
         ...prevRecords,
-        [registerTypes.RECEIVE]: {
-          ...prevRecords[registerTypes.RECEIVE],
-          [receivePartTypes.PART_I]: [...(prevRecords[registerTypes.RECEIVE]?.[receivePartTypes.PART_I] || [])],
-          [receivePartTypes.PART_II]: [...(prevRecords[registerTypes.RECEIVE]?.[receivePartTypes.PART_II] || [])],
-          [receivePartTypes.PART_III]: [...(prevRecords[registerTypes.RECEIVE]?.[receivePartTypes.PART_III] || [])],
-          [receivePartTypes.PART_IV]: [...(prevRecords[registerTypes.RECEIVE]?.[receivePartTypes.PART_IV] || [])]
-        },
-        [registerTypes.ISSUED]: [...(prevRecords[registerTypes.ISSUED] || [])]  // ← FIXED!
+        [registerTypes.RECEIVE]: { ...prevRecords[registerTypes.RECEIVE] }
       };
 
       if (selectedRegister === registerTypes.RECEIVE) {

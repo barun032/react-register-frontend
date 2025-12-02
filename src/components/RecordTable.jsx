@@ -1,10 +1,58 @@
-// src/components/RecordTable.js (With Soft Borders)
-import React from 'react';
+// src/components/RecordTable.jsx
+import React, { useState, useMemo, useEffect } from 'react';
 import { registerTableHeaders, registerFieldMappings, registerTypes, statusTypes } from '../data/registerData';
 
 const RecordTable = ({ selectedRegister, records, onPrint }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
+
   const tableHeaders = registerTableHeaders[selectedRegister] || [];
   const fieldMappings = registerFieldMappings[selectedRegister] || {};
+
+  // Filtered + Sorted records
+  const processedRecords = useMemo(() => {
+    let result = [...records];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(record => {
+        const id = (record.id || '').toString();
+        const subject = (record.subject || '').toLowerCase();
+        const person = selectedRegister === registerTypes.RECEIVE
+          ? (record.from || '').toLowerCase()
+          : (record.to || '').toLowerCase();
+        return id.includes(q) || subject.includes(q) || person.includes(q);
+      });
+    }
+
+    // Sort by Consecutive No. (as number)
+    result.sort((a, b) => {
+      const idA = parseInt(a.id || '0', 10);
+      const idB = parseInt(b.id || '0', 10);
+      return sortOrder === 'asc' ? idA - idB : idB - idA;
+    });
+
+    return result;
+  }, [records, searchQuery, selectedRegister, sortOrder]);
+
+  // Reset page when search, rows, or sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, rowsPerPage, sortOrder]);
+
+  // Pagination
+  const totalPages = Math.ceil(processedRecords.length / rowsPerPage);
+  const paginatedRecords = useMemo(() => {
+    const start = (currentPage - 1) * rowsPerPage;
+    return processedRecords.slice(start, start + rowsPerPage);
+  }, [processedRecords, currentPage, rowsPerPage]);
+
+  const toggleSort = () => {
+    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -24,61 +72,30 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
   const getStatusIcon = (status) => {
     switch (status) {
       case statusTypes.COMPLETED:
-      case statusTypes.ACKNOWLEDGED:
-        return '✅';
-      case statusTypes.PENDING:
-        return '⏳';
+      case statusTypes.ACKNOWLEDGED: return 'Check';
+      case statusTypes.PENDING: return 'Hourglass';
       case statusTypes.IN_PROGRESS:
-      case statusTypes.PARTIALLY_ISSUED:
-        return '🔄';
-      default:
-        return '📄';
+      case statusTypes.PARTIALLY_ISSUED: return 'Sync';
+      default: return 'File';
     }
   };
 
- 
-   const getAllColumnNames = () => {
+  const getAllColumnNames = () => {
     if (selectedRegister === registerTypes.RECEIVE) {
       return [
-        'Consecutive No.',
-        'Date of receipt in office',
-        'From whom received',
-        'Reference Number',
-        'Reference Date',
-        'Short subject',
-        'Reminder Number',
-        'Reminder Date',
-        'File No.',
-        'Sl. No.',
-        'No. of the Collection',
-        'No. of the file within the collection',
-        'Type of action',
-        'Memo No.',
-        'Dispatch Date',
-        'Endorsed To',
-        'Status'
+        'Consecutive No.', 'Date of receipt in office', 'From whom received', 'Reference Number',
+        'Reference Date', 'Short subject', 'Reminder Number', 'Reminder Date', 'File No.', 'Sl. No.',
+        'No. of the Collection', 'No. of the file within the collection', 'Type of action',
+        'Memo No.', 'Dispatch Date', 'Endorsed To', 'Status'
       ];
     } else if (selectedRegister === registerTypes.ISSUED) {
       return [
-        'Consecutive No.',
-        'Date',
-        'To whom addressed',
-        'Short subject',
-        'File No. & Serial No.',
-        'No. & title of collection',
-        'No. of file within the collection',
-        'No. and date of reply receive',
-        'Receive Register Ref.',
-        'Reminder No.',                // Sub-header under 'Reminder'
-        'Reminder Date',               // Sub-header under 'Reminder'
-        'Rs.',                         // Sub-header under 'Value of Stamp.'
-        'P.',                          // Sub-header under 'Value of Stamp.'
-        'Remarks',
-        'Name of the Officer.',
-        'Status'
+        'Consecutive No.', 'Date', 'To whom addressed', 'Short subject',
+        'File No. & Serial No.', 'No. & title of collection', 'No. of file within the collection',
+        'No. and date of reply receive', 'Part No.', 'Ref No.', 'Reminder No.', 'Reminder Date',
+        'Rs.', 'P.', 'Remarks', 'Name of the Officer.', 'Status'
       ];
     }
-    
     return [];
   };
   const allColumns = getAllColumnNames();
@@ -86,136 +103,174 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
   return (
     <div className="px-4 sm:px-6 lg:px-8 pb-8">
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {/* Table Header */}
+        {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Records</h2>
               <p className="text-sm text-gray-600 mt-1">
-                {records.length} records in {selectedRegister}
+                {processedRecords.length} record{processedRecords.length !== 1 ? 's' : ''} in {selectedRegister}
+                {searchQuery && ` • Searching "${searchQuery}"`}
+                {sortOrder === 'desc' ? ' • Sorted newest first' : ' • Sorted oldest first'}
               </p>
             </div>
-            <button
-              onClick={onPrint}
-              className="px-4 py-2 bg-slate-700 text-white font-medium rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 flex items-center space-x-2"
-            >
-              <span>📄</span>
-              <span>Export / Print</span>
-            </button>
+
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by No., Subject, Name..."
+                  className="w-full sm:w-80 px-4 py-2.5 pl-10 border border-gray-300 rounded-lg bg-white text-gray-700 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 focus:outline-none transition-colors"
+                />
+                <svg className="absolute left-3 top-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+
+              <button
+                onClick={onPrint}
+                className="px-4 py-2 bg-slate-700 text-white font-medium rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap"
+              >
+                <span>Print</span>
+                <span>Export / Print</span>
+              </button>
+            </div>
           </div>
         </div>
-        
-        {/* Table Container */}
+
+        {/* Table */}
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse">
             <thead className="bg-gray-50">
-              {/* Dynamic Header Rows */}
               {tableHeaders.map((row, rowIndex) => (
                 <tr key={rowIndex}>
-                  {row.map((header, headerIndex) => (
-                    <th
-                      key={headerIndex}
-                      rowSpan={header.rowspan || 1}
-                      colSpan={header.colspan || 1}
-                      className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 ${header.className || ''}`}
-                    >
-                      {header.name}
-                    </th>
-                  ))}
-                  {/* Add 'Status' column header explicitly if it's the last column */}
-                  {rowIndex === 0 && <th rowSpan={2} className="px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200">Status</th>}
-                </tr>
-              ))}
-              {/* This is the final row, so we don't need to check for rowIndex==1 if we fix the above logic */}
-              {tableHeaders.length === 1 && <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200">Status</th>}
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {records.map((record, index) => (
-                <tr 
-                  key={record.id} 
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
-                  {allColumns.map((columnName, colIndex) => {
-                    // Special case for 'Status' field, which is not in fieldMappings but is a record property
-                    const isStatusColumn = columnName === 'Status';
-                    // Special case for 'Consecutive No.', which uses 'id' but is custom rendered
-                    const isIdColumn = columnName === 'Consecutive No.';
-                    
-                    const fieldName = isIdColumn ? 'id' : isStatusColumn ? 'status' : fieldMappings[columnName];
-                    const value = record[fieldName];
-                    
-                    // console.log(`Column: ${columnName}, Field: ${fieldName}, Value:`, value);
-
-                    if (isStatusColumn) {
-                      // Status rendering logic
-                      return (
-                        <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm border border-gray-200">
-                          <div className="flex items-center justify-center space-x-2">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(value)}`}>
-                              <span className="mr-1.5">{getStatusIcon(value)}</span>
-                              {value}
-                            </span>
-                          </div>
-                        </td>
-                      );
-                    }
-                    
-                    if (isIdColumn) {
-                      // Consecutive No. rendering logic
-                      return (
-                        <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 text-center border border-gray-200">
-                          <span className="text-sm font-mono font-medium text-slate-700 bg-slate-50 px-2 py-1 rounded border border-slate-200">
-                            {record.id || value}
-                          </span>
-                        </td>
-                      );
-                    }
-
-                    if (columnName === 'Rs.' || columnName === 'P.') {
-                      // Stamp Value rendering logic
-                      return (
-                        <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-center border border-gray-200">
-                          {value || '0'}
-                        </td>
-                      );
-                    }
-                      if (columnName === 'Part No.') {
-                      return (
-                        <td key={colIndex} className="px-4 py-3 text-center border border-gray-200 text-xs font-medium text-gray-600">
-                          {value || '—'}
-                        </td>
-                      );
-                    }
-
-                    if (columnName === 'Ref No.') {
-                      return (
-                        <td key={colIndex} className="px-4 py-3 text-center border border-gray-200 font-medium">
-                          <span className="inline-block px-3 py-1 text-xs font-mono font-bold text-slate-800 bg-slate-100 rounded border border-slate-300">
-                            {value || '—'}
-                          </span>
-                        </td>
-                      );
-                    }
-                    
+                  {row.map((header, headerIndex) => {
+                    const isConsecutiveHeader = header.name === 'Consecutive No.';
                     return (
-                      <td
-                        key={colIndex}
-                        className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-200"
+                      <th
+                        key={headerIndex}
+                        rowSpan={header.rowspan || 1}
+                        colSpan={header.colspan || 1}
+                        onClick={isConsecutiveHeader ? toggleSort : undefined}
+                        className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 ${
+                          header.className || ''
+                        } ${isConsecutiveHeader ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}`}
                       >
-                        {value || '-'}
-                      </td>
+                        <div className="flex items-center justify-center gap-1">
+                          {header.name}
+                          {isConsecutiveHeader && (
+                            <div className="flex flex-col -space-y-1">
+                              {/* Up Arrow - active when ascending */}
+                              <svg
+                                className={`w-3.5 h-3.5 transition-all ${sortOrder === 'asc' ? 'text-slate-800' : 'text-gray-400'}`}
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                              </svg>
+                              {/* Down Arrow - active when descending */}
+                              <svg
+                                className={`w-3.5 h-3.5 transition-all ${sortOrder === 'desc' ? 'text-slate-800' : 'text-gray-400'}`}
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      </th>
                     );
                   })}
+                  {rowIndex === 0 && selectedRegister === registerTypes.RECEIVE && (
+                    <th rowSpan={2} className="px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200">
+                      Status
+                    </th>
+                  )}
                 </tr>
               ))}
+              {tableHeaders.length === 1 && selectedRegister === registerTypes.RECEIVE && (
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200">
+                  Status
+                </th>
+              )}
+            </thead>
+
+            <tbody className="bg-white divide-y divide-gray-200">
+              {paginatedRecords.length === 0 ? (
+                <tr>
+                  <td colSpan="50" className="text-center py-16 text-gray-500 text-base">
+                    {searchQuery ? `No records found for "${searchQuery}"` : 'No records found'}
+                  </td>
+                </tr>
+              ) : (
+                paginatedRecords.map((record) => (
+                  <tr key={record.id} className="hover:bg-gray-50 transition-colors duration-150">
+                    {allColumns.map((columnName, colIndex) => {
+                      const isStatusColumn = columnName === 'Status';
+                      const isIdColumn = columnName === 'Consecutive No.';
+                      const fieldName = isIdColumn ? 'id' : isStatusColumn ? 'status' : fieldMappings[columnName];
+                      const value = record[fieldName];
+
+                      if (isStatusColumn) {
+                        if (selectedRegister !== registerTypes.RECEIVE) return null;
+                        return (
+                          <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm border border-gray-200">
+                            <div className="flex items-center justify-center space-x-2">
+                              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(value)}`}>
+                                <span className="mr-1.5">{getStatusIcon(value)}</span>
+                                {value}
+                              </span>
+                            </div>
+                          </td>
+                        );
+                      }
+
+                      if (isIdColumn) {
+                        return (
+                          <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 text-center border border-gray-200">
+                            <span className="text-sm font-mono font-medium text-slate-700 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+                              {record.id || value}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      if (columnName === 'Rs.' || columnName === 'P.') {
+                        return <td key={colIndex} className="px-4 py-3 text-center border border-gray-200">{value || '0'}</td>;
+                      }
+                      if (columnName === 'Part No.') {
+                        return <td key={colIndex} className="px-4 py-3 text-center border border-gray-200 text-xs font-medium text-gray-600">{value || '—'}</td>;
+                      }
+                      if (columnName === 'Ref No.') {
+                        return (
+                          <td key={colIndex} className="px-4 py-3 text-center border border-gray-200 font-medium">
+                            <span className="inline-block px-3 py-1 text-xs font-mono font-bold text-slate-800 bg-slate-100 rounded border border-slate-300">
+                              {value || '—'}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      return (
+                        <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-200">
+                          {value || '-'}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
-          
+
           {/* Empty State */}
-          {records.length === 0 && (
+          {records.length === 0 && !searchQuery && (
             <div className="text-center py-12 px-6 border-gray-200 border-t-0">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                <span className="text-2xl">📝</span>
+                <span className="text-2xl">Document</span>
               </div>
               <h3 className="text-base font-medium text-gray-900 mb-2">No records found</h3>
               <p className="text-gray-600 max-w-md mx-auto">
@@ -225,12 +280,65 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
           )}
         </div>
 
-        {/* Table Footer */}
-        {records.length > 0 && (
-          <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-            <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-gray-600">
-              <span>Showing {records.length} records</span>
-              <span className="mt-2 sm:mt-0">Last updated: {new Date().toLocaleTimeString()}</span>
+        {/* Pagination Footer */}
+        {processedRecords.length > 0 && (
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span>Rows per page:</span>
+                  <select
+                    value={rowsPerPage}
+                    onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                    className="px-3 py-1.5 border border-gray-300 rounded-lg bg-white text-gray-700 focus:border-slate-500 focus:outline-none cursor-pointer text-sm"
+                  >
+                    {[10, 25, 50, 100].map(num => (
+                      <option key={num} value={num}>{num}</option>
+                    ))}
+                  </select>
+                </div>
+                <span>
+                  Showing {(currentPage - 1) * rowsPerPage + 1}–{Math.min(currentPage * rowsPerPage, processedRecords.length)} of {processedRecords.length}
+                </span>
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Previous
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2)
+                    .map((page, idx, arr) => (
+                      <div key={page} className="flex items-center">
+                        {idx > 0 && arr[idx - 1] !== page - 1 && <span className="px-2 text-gray-400">...</span>}
+                        <button
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-9 h-9 rounded font-medium transition-colors ${
+                            currentPage === page
+                              ? 'bg-slate-700 text-white'
+                              : 'bg-white border border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      </div>
+                    ))}
+
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

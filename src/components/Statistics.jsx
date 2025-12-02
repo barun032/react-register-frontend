@@ -9,20 +9,24 @@ const Statistics = ({ allRecords }) => {
     let pendingRecords = 0;
     let completedRecords = 0;
 
+    // Inside calculateStats()
     Object.values(registerTypes).forEach(registerType => {
       const records = allRecords[registerType] || [];
       totalRecords += records.length;
-      
-      records.forEach(record => {
-        if (record.status === statusTypes.PENDING || 
+
+      // Only count status if it's Receive Register
+      if (registerType === registerTypes.RECEIVE) {
+        records.forEach(record => {
+          if (record.status === statusTypes.PENDING ||
             record.status === statusTypes.IN_PROGRESS ||
             record.status === statusTypes.PARTIALLY_ISSUED) {
-          pendingRecords++;
-        } else if (record.status === statusTypes.COMPLETED || 
-                   record.status === statusTypes.ACKNOWLEDGED) {
-          completedRecords++;
-        }
-      });
+            pendingRecords++;
+          } else if (record.status === statusTypes.COMPLETED ||
+            record.status === statusTypes.ACKNOWLEDGED) {
+            completedRecords++;
+          }
+        });
+      }
     });
 
     return { totalRecords, pendingRecords, completedRecords };

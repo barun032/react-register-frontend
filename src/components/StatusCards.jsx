@@ -4,20 +4,32 @@ import { statusTypes, registerTypes } from '../data/registerData';
 
 const StatusCards = ({ records, selectedRegister, selectedPart }) => {
   const calculateStats = () => {
-    const totalRecords = records.length;
-    
-    const pendingRecords = records.filter(record => 
-      record.status === statusTypes.PENDING || 
+    // If it's Dispatch Register → return zeros for status-based stats
+    if (selectedRegister === registerTypes.ISSUED) {
+      return {
+        totalRecords: records.length,
+        pendingRecords: 0,
+        completedRecords: 0
+      };
+    }
+
+    // Only for Receive Register (or any future register that has status)
+    const pendingRecords = records.filter(record =>
+      record.status === statusTypes.PENDING ||
       record.status === statusTypes.IN_PROGRESS ||
       record.status === statusTypes.PARTIALLY_ISSUED
     ).length;
-    
-    const completedRecords = records.filter(record => 
-      record.status === statusTypes.COMPLETED || 
+
+    const completedRecords = records.filter(record =>
+      record.status === statusTypes.COMPLETED ||
       record.status === statusTypes.ACKNOWLEDGED
     ).length;
 
-    return { totalRecords, pendingRecords, completedRecords };
+    return {
+      totalRecords: records.length,
+      pendingRecords,
+      completedRecords
+    };
   };
 
   const stats = calculateStats();
@@ -52,7 +64,7 @@ const StatusCards = ({ records, selectedRegister, selectedPart }) => {
           Track and manage your document workflow
         </p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
           title="Total Records"
@@ -60,18 +72,22 @@ const StatusCards = ({ records, selectedRegister, selectedPart }) => {
           color="text-blue-500"
           icon="📊"
         />
-        <StatCard
-          title="Pending Actions"
-          value={stats.pendingRecords}
-          color="text-amber-500"
-          icon="⏳"
-        />
-        <StatCard
-          title="Completed"
-          value={stats.completedRecords}
-          color="text-emerald-500"
-          icon="✅"
-        />
+        {selectedRegister === registerTypes.RECEIVE && (
+          <>
+            <StatCard
+              title="Pending Actions"
+              value={stats.pendingRecords}
+              color="text-amber-500"
+              icon="⏳"
+            />
+            <StatCard
+              title="Completed"
+              value={stats.completedRecords}
+              color="text-emerald-500"
+              icon="✅"
+            />
+          </>
+        )}
       </div>
     </div>
   );
