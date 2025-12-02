@@ -23,47 +23,48 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
 
   // In PrintView.jsx - REPLACE the existing getAllColumnNames function with this:
 
-  const getAllColumnNames = () => {
-    if (selectedRegister === registerTypes.RECEIVE) {
-      return [
-        'Consecutive No.',
-        'Date of receipt in office',
-        'From whom received',
-        'Reference Number',
-        'Reference Date',
-        'Short subject',
-        'Reminder Number',
-        'Reminder Date',
-        'File No.',
-        'Sl. No.',
-        'No. of the Collection',
-        'No. of the file within the collection',
-        'Type of action',
-        'Memo No.',
-        'Dispatch Date',
-        'Endorsed To'
-      ];
-    } else if (selectedRegister === registerTypes.ISSUED) {
-      return [
-        'Consecutive No.',
-        'Date',
-        'To whom addressed',
-        'Short subject',
-        'File No. & Serial No.',
-        'No. & title of collection',
-        'No. of file within the collection',
-        'No. and date of reply receive',
-        'Receive Register Ref.',
-        'Reminder No.',
-        'Reminder Date',
-        'Rs.',
-        'P.',
-        'Remarks',
-        'Name of the Officer.'
-      ];
-    }
-    return [];
-  };
+ const getAllColumnNames = () => {
+  if (selectedRegister === registerTypes.RECEIVE) {
+    return [
+      'Consecutive No.',
+      'Date of receipt in office',
+      'From whom received',
+      'Reference Number',
+      'Reference Date',
+      'Short subject',
+      'Reminder Number',
+      'Reminder Date',
+      'File No.',
+      'Sl. No.',
+      'No. of the Collection',
+      'No. of the file within the collection',
+      'Type of action',
+      'Memo No.',
+      'Dispatch Date',
+      'Endorsed To'
+    ];
+  } else if (selectedRegister === registerTypes.ISSUED) {
+    return [
+      'Consecutive No.',
+      'Date',
+      'To whom addressed',
+      'Short subject',
+      'File No. & Serial No.',
+      'No. & title of collection',
+      'No. of file within the collection',
+      'No. and date of reply receive',
+      'Part No.',           // NOW INCLUDED
+      'Ref No.',            // NOW INCLUDED
+      'Reminder No.',
+      'Reminder Date',
+      'Rs.',
+      'P.',
+      'Remarks',
+      'Name of the Officer.'
+    ];
+  }
+  return [];
+};
 
   const allColumns = getAllColumnNames();
 
