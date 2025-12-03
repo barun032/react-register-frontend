@@ -1,6 +1,8 @@
 // src/components/StatusCards.js
 import React from 'react';
 import { statusTypes, registerTypes } from '../data/registerData';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircleCheck,faHourglassHalf, faDatabase } from '@fortawesome/free-solid-svg-icons';
 
 const StatusCards = ({ records, selectedRegister, selectedPart }) => {
   const calculateStats = () => {
@@ -70,7 +72,7 @@ const StatusCards = ({ records, selectedRegister, selectedPart }) => {
           title="Total Records"
           value={stats.totalRecords}
           color="text-blue-500"
-          icon="📊"
+          icon={<FontAwesomeIcon icon={faDatabase} className="w-6 h-6" />}
         />
         {selectedRegister === registerTypes.RECEIVE && (
           <>
@@ -78,13 +80,13 @@ const StatusCards = ({ records, selectedRegister, selectedPart }) => {
               title="Pending Actions"
               value={stats.pendingRecords}
               color="text-amber-500"
-              icon="⏳"
+              icon={<FontAwesomeIcon icon={faHourglassHalf} className="w-6 h-6" />}
             />
             <StatCard
               title="Completed"
               value={stats.completedRecords}
               color="text-emerald-500"
-              icon="✅"
+              icon={<FontAwesomeIcon icon={faCircleCheck} className="w-6 h-6" />}
             />
           </>
         )}

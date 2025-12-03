@@ -2,6 +2,28 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { registerTableHeaders, registerFieldMappings, registerTypes, statusTypes } from '../data/registerData';
 
+
+const getStatusFromRecord = (record) => {
+  if (record.dispatchMemoNo && record.dispatchMemoNo.trim() !== '') {
+    return statusTypes.COMPLETED || 'Completed';
+  }
+
+  const actionType = record.actionType;
+
+  if (!actionType) return statusTypes.PENDING || 'Pending';
+
+  switch (actionType) {
+    case 'Not Returnable':
+      return statusTypes.ACTION_TAKEN || 'Action Taken';
+    case 'Attached to File':
+      return statusTypes.IN_PROGRESS || 'In Progress';
+    case 'Returnable':
+      return statusTypes.PENDING || 'Pending';
+    default:
+      return statusTypes.PENDING || 'Pending';
+  }
+};
+
 const RecordTable = ({ selectedRegister, records, onPrint }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,7 +78,10 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
+      case statusTypes.ACTION_TAKEN:
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case statusTypes.COMPLETED:
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case statusTypes.ACKNOWLEDGED:
         return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case statusTypes.PENDING:
@@ -71,14 +96,22 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
 
   const getStatusIcon = (status) => {
     switch (status) {
+      case statusTypes.ACTION_TAKEN:
+        return <i className="fa-solid fa-circle-check"></i>;
       case statusTypes.COMPLETED:
-      case statusTypes.ACKNOWLEDGED: return 'Check';
-      case statusTypes.PENDING: return 'Hourglass';
+        return <i className="fa-solid fa-check-double"></i>
+      case statusTypes.ACKNOWLEDGED:
+        return <i className="fa-solid fa-circle-check"></i>;
+      case statusTypes.PENDING:
+        return <i className="fa-solid fa-hourglass-end"></i>;
       case statusTypes.IN_PROGRESS:
-      case statusTypes.PARTIALLY_ISSUED: return 'Sync';
-      default: return 'File';
+      case statusTypes.PARTIALLY_ISSUED:
+        return <i className="fa-solid fa-rotate"></i>;
+      default:
+        return 'FileText';
     }
   };
+
 
   const getAllColumnNames = () => {
     if (selectedRegister === registerTypes.RECEIVE) {
@@ -154,9 +187,8 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
                         rowSpan={header.rowspan || 1}
                         colSpan={header.colspan || 1}
                         onClick={isConsecutiveHeader ? toggleSort : undefined}
-                        className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 ${
-                          header.className || ''
-                        } ${isConsecutiveHeader ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}`}
+                        className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 ${header.className || ''
+                          } ${isConsecutiveHeader ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}`}
                       >
                         <div className="flex items-center justify-center gap-1">
                           {header.name}
@@ -216,12 +248,14 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
 
                       if (isStatusColumn) {
                         if (selectedRegister !== registerTypes.RECEIVE) return null;
+                        const computedStatus = getStatusFromRecord(record);
+
                         return (
                           <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm border border-gray-200">
                             <div className="flex items-center justify-center space-x-2">
-                              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(value)}`}>
-                                <span className="mr-1.5">{getStatusIcon(value)}</span>
-                                {value}
+                              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(computedStatus)}`}>
+                                <span className="mr-1.5">{getStatusIcon(computedStatus)}</span>
+                                {computedStatus}
                               </span>
                             </div>
                           </td>
@@ -265,19 +299,6 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
               )}
             </tbody>
           </table>
-
-          {/* Empty State */}
-          {records.length === 0 && !searchQuery && (
-            <div className="text-center py-12 px-6 border-gray-200 border-t-0">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                <span className="text-2xl">Document</span>
-              </div>
-              <h3 className="text-base font-medium text-gray-900 mb-2">No records found</h3>
-              <p className="text-gray-600 max-w-md mx-auto">
-                Get started by creating your first record in the {selectedRegister}.
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Pagination Footer */}
@@ -319,11 +340,10 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
                         {idx > 0 && arr[idx - 1] !== page - 1 && <span className="px-2 text-gray-400">...</span>}
                         <button
                           onClick={() => setCurrentPage(page)}
-                          className={`w-9 h-9 rounded font-medium transition-colors ${
-                            currentPage === page
-                              ? 'bg-slate-700 text-white'
-                              : 'bg-white border border-gray-300 hover:bg-gray-50'
-                          }`}
+                          className={`w-9 h-9 rounded font-medium transition-colors ${currentPage === page
+                            ? 'bg-slate-700 text-white'
+                            : 'bg-white border border-gray-300 hover:bg-gray-50'
+                            }`}
                         >
                           {page}
                         </button>

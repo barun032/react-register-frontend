@@ -144,10 +144,10 @@ export const registerFields = {
       label: 'Endorsed To', 
       type: 'select', 
       options: [
-        'Rupali Santra',
-        'Bikash Sen',
-        'Sadhana Singha', 
-        'Ummey Salma',
+        'SI Rupali Santra',
+        'SI Bikash Sen',
+        'SI Sadhana Singha', 
+        'SI Ummey Salma',
       ],
       required: true
     }
@@ -182,21 +182,20 @@ export const registerFields = {
     { name: 'reminderDate', label: 'Reminder Date', type: 'date' },
     { name: 'stampRupees', label: 'Stamp Value (Rs.)', type: 'number', min: 0 },
     { name: 'stampPaise', label: 'Stamp Value (P.)', type: 'number', min: 0, max: 99 },
-    { name: 'remarks', label: 'Remarks', type: 'textarea' },
     {
       name: 'officerName',
       label: 'Name of the Officer',
       type: 'select',
-      options: ['Rupali Santra', 'Bikash Sen', 'Sadhana Singha', 'Ummey Salma'],
+      options: ['SI Rupali Santra', 'SI Bikash Sen', 'SI Sadhana Singha', 'SI Ummey Salma'],
       required: true
-    }
+    },
+    { name: 'remarks', label: 'Remarks', type: 'textarea' }
   ]
 };
 
 export const statusTypes = {
   PENDING: 'Pending',
-  COMPLETED: 'Completed',
   IN_PROGRESS: 'In Progress',
-  ACKNOWLEDGED: 'Acknowledged',
-  PARTIALLY_ISSUED: 'Partially Issued'
+  ACTION_TAKEN: 'Action Taken',       
+  COMPLETED: 'Completed'
 };
