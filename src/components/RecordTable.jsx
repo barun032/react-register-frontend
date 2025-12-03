@@ -1,6 +1,8 @@
 // src/components/RecordTable.jsx
 import React, { useState, useMemo, useEffect } from 'react';
 import { registerTableHeaders, registerFieldMappings, registerTypes, statusTypes } from '../data/registerData';
+import Pagination from './Pagination';
+import TableToolbar from './TableToolbar';
 
 const getStatusFromRecord = (record) => {
   if (record.dispatchMemoNo && record.dispatchMemoNo.trim() !== '') {
@@ -82,7 +84,7 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
   // Reset page on any filter change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, dateFrom, dateTo, rowsPerPage, sortOrder]);
+  }, [selectedRegister, records, searchQuery, dateFrom, dateTo, rowsPerPage]);
 
   const totalPages = Math.ceil(processedRecords.length / rowsPerPage);
   const paginatedRecords = useMemo(() => {
@@ -149,77 +151,18 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
   return (
     <div className="px-4 sm:px-6 lg:px-8 pb-8">
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {/* Header with Date Filter + Search */}
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">Records</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                {processedRecords.length} record{processedRecords.length !== 1 ? 's' : ''} in {selectedRegister}
-                {searchQuery && ` • Searching "${searchQuery}"`}
-                {(dateFrom || dateTo) && ` • Date: ${dateFrom || '...'} to ${dateTo || '...'}`}
-                {sortOrder === 'desc' ? ' • Sorted newest first' : ' • Sorted oldest first'}
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-              {/* Date Range Filter - Left Side */}
-              <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 py-2 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                    className="text-sm border-0 focus:ring-0 focus:outline-none"
-                    placeholder="From"
-                  />
-                  <span className="text-gray-400">→</span>
-                  <input
-                    type="date"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                    className="text-sm border-0 focus:ring-0 focus:outline-none"
-                    placeholder="To"
-                  />
-                </div>
-                {(dateFrom || dateTo) && (
-                  <button
-                    onClick={() => {
-                      setDateFrom('');
-                      setDateTo('');
-                    }}
-                    className="text-gray-400 hover:text-red-600 transition-colors"
-                  >
-                    <i className="fa-solid fa-xmark"></i>
-                  </button>
-                )}
-              </div>
-
-              {/* Search Box */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by No., Subject, Name..."
-                  className="w-full sm:w-80 px-4 py-2.5 pl-10 border border-gray-300 rounded-lg bg-white text-gray-700 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 focus:outline-none transition-colors"
-                />
-                <svg className="absolute left-3 top-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-
-              {/* Print Button */}
-              <button
-                onClick={onPrint}
-                className="px-4 py-2 bg-slate-700 text-white font-medium rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap"
-              >
-                <span>Print</span>
-                <span>Export / Print</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <TableToolbar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          dateFrom={dateFrom}
+          setDateFrom={setDateFrom}
+          dateTo={dateTo}
+          setDateTo={setDateTo}
+          onPrint={onPrint}
+          filteredCount={processedRecords.length}
+          sortOrder={sortOrder}
+          selectedRegister={selectedRegister}
+        />
 
         {/* Rest of your table (unchanged) */}
         <div className="overflow-x-auto">
@@ -341,60 +284,16 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
           </table>
         </div>
 
-        {/* Pagination - unchanged */}
+        {/* Pagination */}
         {processedRecords.length > 0 && (
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span>Rows per page:</span>
-                  <select
-                    value={rowsPerPage}
-                    onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                    className="px-3 py-1.5 border border-gray-300 rounded-lg bg-white text-gray-700 focus:border-slate-500 focus:outline-none cursor-pointer text-sm"
-                  >
-                    {[10, 25, 50, 100].map(num => (
-                      <option key={num} value={num}>{num}</option>
-                    ))}
-                  </select>
-                </div>
-                <span>
-                  Showing {(currentPage - 1) * rowsPerPage + 1}–{Math.min(currentPage * rowsPerPage, processedRecords.length)} of {processedRecords.length}
-                </span>
-              </div>
-
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                    className="px-3 py-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                    Previous
-                  </button>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2)
-                    .map((page, idx, arr) => (
-                      <div key={page} className="flex items-center">
-                        {idx > 0 && arr[idx - 1] !== page - 1 && <span className="px-2 text-gray-400">...</span>}
-                        <button
-                          onClick={() => setCurrentPage(page)}
-                          className={`w-9 h-9 rounded font-medium transition-colors ${currentPage === page
-                            ? 'bg-slate-700 text-white'
-                            : 'bg-white border border-gray-300 hover:bg-gray-50'
-                            }`}
-                        >
-                          {page}
-                        </button>
-                      </div>
-                    ))}
-
-                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                    Next
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={processedRecords.length}
+            itemsPerPage={rowsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={setRowsPerPage}
+          />
         )}
       </div>
     </div>
