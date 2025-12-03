@@ -2,14 +2,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { registerTableHeaders, registerFieldMappings, registerTypes, statusTypes } from '../data/registerData';
 
-
 const getStatusFromRecord = (record) => {
   if (record.dispatchMemoNo && record.dispatchMemoNo.trim() !== '') {
     return statusTypes.COMPLETED || 'Completed';
   }
 
   const actionType = record.actionType;
-
   if (!actionType) return statusTypes.PENDING || 'Pending';
 
   switch (actionType) {
@@ -26,16 +24,37 @@ const getStatusFromRecord = (record) => {
 
 const RecordTable = ({ selectedRegister, records, onPrint }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
+  const [sortOrder, setSortOrder] = useState('desc');
 
   const tableHeaders = registerTableHeaders[selectedRegister] || [];
   const fieldMappings = registerFieldMappings[selectedRegister] || {};
 
-  // Filtered + Sorted records
+  // Filtered + Sorted + Date-filtered records
   const processedRecords = useMemo(() => {
     let result = [...records];
+
+    // Date Range Filter
+    if (dateFrom || dateTo) {
+      result = result.filter(record => {
+        const recordDate = record.date ? new Date(record.date) : null;
+        if (!recordDate) return false;
+
+        const from = dateFrom ? new Date(dateFrom) : null;
+        const to = dateTo ? new Date(dateTo) : null;
+
+        if (from && to) {
+          return recordDate >= from && recordDate <= to;
+        }
+        if (from) return recordDate >= from;
+        if (to) return recordDate <= to;
+
+        return true;
+      });
+    }
 
     // Search filter
     if (searchQuery.trim()) {
@@ -50,7 +69,7 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
       });
     }
 
-    // Sort by Consecutive No. (as number)
+    // Sort by Consecutive No.
     result.sort((a, b) => {
       const idA = parseInt(a.id || '0', 10);
       const idB = parseInt(b.id || '0', 10);
@@ -58,14 +77,13 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
     });
 
     return result;
-  }, [records, searchQuery, selectedRegister, sortOrder]);
+  }, [records, searchQuery, dateFrom, dateTo, selectedRegister, sortOrder]);
 
-  // Reset page when search, rows, or sort changes
+  // Reset page on any filter change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, rowsPerPage, sortOrder]);
+  }, [searchQuery, dateFrom, dateTo, rowsPerPage, sortOrder]);
 
-  // Pagination
   const totalPages = Math.ceil(processedRecords.length / rowsPerPage);
   const paginatedRecords = useMemo(() => {
     const start = (currentPage - 1) * rowsPerPage;
@@ -79,9 +97,7 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case statusTypes.ACTION_TAKEN:
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case statusTypes.COMPLETED:
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case statusTypes.ACKNOWLEDGED:
         return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case statusTypes.PENDING:
@@ -97,21 +113,18 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
   const getStatusIcon = (status) => {
     switch (status) {
       case statusTypes.ACTION_TAKEN:
-        return <i className="fa-solid fa-circle-check"></i>;
       case statusTypes.COMPLETED:
-        return <i className="fa-solid fa-check-double"></i>
       case statusTypes.ACKNOWLEDGED:
         return <i className="fa-solid fa-circle-check"></i>;
       case statusTypes.PENDING:
-        return <i className="fa-solid fa-hourglass-end"></i>;
+        return <i className="fa-solid fa-hourglass-half"></i>;
       case statusTypes.IN_PROGRESS:
       case statusTypes.PARTIALLY_ISSUED:
-        return <i className="fa-solid fa-rotate"></i>;
+        return <i className="fa-solid fa-sync-alt fa-spin"></i>;
       default:
-        return 'FileText';
+        return <i className="fa-solid fa-file-lines"></i>;
     }
   };
-
 
   const getAllColumnNames = () => {
     if (selectedRegister === registerTypes.RECEIVE) {
@@ -136,7 +149,7 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
   return (
     <div className="px-4 sm:px-6 lg:px-8 pb-8">
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {/* Header */}
+        {/* Header with Date Filter + Search */}
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
@@ -144,11 +157,45 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
               <p className="text-sm text-gray-600 mt-1">
                 {processedRecords.length} record{processedRecords.length !== 1 ? 's' : ''} in {selectedRegister}
                 {searchQuery && ` • Searching "${searchQuery}"`}
+                {(dateFrom || dateTo) && ` • Date: ${dateFrom || '...'} to ${dateTo || '...'}`}
                 {sortOrder === 'desc' ? ' • Sorted newest first' : ' • Sorted oldest first'}
               </p>
             </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+              {/* Date Range Filter - Left Side */}
+              <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 py-2 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="text-sm border-0 focus:ring-0 focus:outline-none"
+                    placeholder="From"
+                  />
+                  <span className="text-gray-400">→</span>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="text-sm border-0 focus:ring-0 focus:outline-none"
+                    placeholder="To"
+                  />
+                </div>
+                {(dateFrom || dateTo) && (
+                  <button
+                    onClick={() => {
+                      setDateFrom('');
+                      setDateTo('');
+                    }}
+                    className="text-gray-400 hover:text-red-600 transition-colors"
+                  >
+                    <i className="fa-solid fa-xmark"></i>
+                  </button>
+                )}
+              </div>
+
+              {/* Search Box */}
               <div className="relative">
                 <input
                   type="text"
@@ -162,6 +209,7 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
                 </svg>
               </div>
 
+              {/* Print Button */}
               <button
                 onClick={onPrint}
                 className="px-4 py-2 bg-slate-700 text-white font-medium rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap"
@@ -173,7 +221,7 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
           </div>
         </div>
 
-        {/* Table */}
+        {/* Rest of your table (unchanged) */}
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse">
             <thead className="bg-gray-50">
@@ -194,20 +242,10 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
                           {header.name}
                           {isConsecutiveHeader && (
                             <div className="flex flex-col -space-y-1">
-                              {/* Up Arrow - active when ascending */}
-                              <svg
-                                className={`w-3.5 h-3.5 transition-all ${sortOrder === 'asc' ? 'text-slate-800' : 'text-gray-400'}`}
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
+                              <svg className={`w-3.5 h-3.5 transition-all ${sortOrder === 'asc' ? 'text-slate-800' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
                               </svg>
-                              {/* Down Arrow - active when descending */}
-                              <svg
-                                className={`w-3.5 h-3.5 transition-all ${sortOrder === 'desc' ? 'text-slate-800' : 'text-gray-400'}`}
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
+                              <svg className={`w-3.5 h-3.5 transition-all ${sortOrder === 'desc' ? 'text-slate-800' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
                             </div>
@@ -234,7 +272,9 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
               {paginatedRecords.length === 0 ? (
                 <tr>
                   <td colSpan="50" className="text-center py-16 text-gray-500 text-base">
-                    {searchQuery ? `No records found for "${searchQuery}"` : 'No records found'}
+                    {searchQuery || dateFrom || dateTo
+                      ? `No records found for the selected filters`
+                      : 'No records found'}
                   </td>
                 </tr>
               ) : (
@@ -301,7 +341,7 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
           </table>
         </div>
 
-        {/* Pagination Footer */}
+        {/* Pagination - unchanged */}
         {processedRecords.length > 0 && (
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
@@ -325,11 +365,8 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
 
               {totalPages > 1 && (
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
+                  <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
+                    className="px-3 py-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                     Previous
                   </button>
 
@@ -350,11 +387,8 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
                       </div>
                     ))}
 
-                  <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
+                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                     Next
                   </button>
                 </div>
