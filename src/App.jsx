@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useState } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { registerTypes, receivePartTypes, statusTypes } from './data/registerData';
@@ -6,14 +7,22 @@ import StatusCards from './components/StatusCards';
 import RecordTable from './components/RecordTable';
 import CreateForm from './components/CreateForm';
 import PrintView from './components/PrintView';
+// 1. IMPORT THE SEPARATE MODAL FILE
+import PrintRangeModal from './components/PrintRangeModal'; 
+
+// 2. DELETED THE INLINE "const PrintRangeModal = ..." COMPONENT FROM HERE
 
 function App() {
   const [selectedRegister, setSelectedRegister] = useState(registerTypes.RECEIVE);
   const [selectedPart, setSelectedPart] = useState(receivePartTypes.PART_I);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isPrintView, setIsPrintView] = useState(false);
 
-  // Initialize state using the custom hook for persistence
+  // Print states
+  const [isPrintRangeModalOpen, setIsPrintRangeModalOpen] = useState(false);
+  const [recordsToPrint, setRecordsToPrint] = useState([]);
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  // LocalStorage persistence
   const [allRecords, setAllRecords] = useLocalStorage('onlineRegister', {
     [registerTypes.RECEIVE]: {
       [receivePartTypes.PART_I]: [],
@@ -24,7 +33,7 @@ function App() {
     [registerTypes.ISSUED]: []
   });
 
-  // Helper to get records for the current view
+  // Get current visible records
   const getCurrentRecords = () => {
     if (selectedRegister === registerTypes.RECEIVE) {
       return allRecords[selectedRegister]?.[selectedPart] || [];
@@ -34,21 +43,16 @@ function App() {
 
   const currentRecords = getCurrentRecords();
 
-  // Helper to calculate the next consecutive ID
+  // Next Consecutive Number
   const getNextConsecutiveNumber = (register, part) => {
-    let records = [];
-    if (register === registerTypes.RECEIVE) {
-      records = allRecords[register]?.[part] || [];
-    } else if (register === registerTypes.ISSUED) {
-      records = allRecords[register] || [];
-    }
-
-    // Find the max ID and increment, default to 1 if no records
-    const maxId = records.reduce((max, record) => Math.max(max, record.id || 0), 0);
+    const records = register === registerTypes.RECEIVE
+      ? allRecords[register]?.[part] || []
+      : allRecords[register] || [];
+    const maxId = records.reduce((max, r) => Math.max(max, parseInt(r.id || 0)), 0);
     return maxId + 1;
   };
 
-  // HANDLERS for UI state changes
+  // Handlers
   const handleRegisterChange = (register) => {
     setSelectedRegister(register);
     if (register === registerTypes.RECEIVE) {
@@ -56,122 +60,76 @@ function App() {
     }
   };
 
-  const handlePartChange = (part) => {
-    setSelectedPart(part);
+  const handlePartChange = (part) => setSelectedPart(part);
+
+  const handlePrintClick = () => {
+    setIsPrintRangeModalOpen(true);
   };
 
-  const handlePrint = () => {
-    setIsPrintView(true);
+  const handlePrintRange = (selectedRecords) => {
+    setRecordsToPrint(selectedRecords);
+    setIsPrinting(true);
   };
 
   const closePrintView = () => {
-    setIsPrintView(false);
+    setIsPrinting(false);
+    setRecordsToPrint([]);
   };
 
-  // HANDLER for creating a new record, including the cross-register update logic
+  // Create record handler
   const handleNewRecord = (formData) => {
-
-    // 1. Prepare new record data
     const newRecordId = getNextConsecutiveNumber(selectedRegister, selectedPart);
-
     const newRecord = {
       id: newRecordId,
-      // Default status, assuming 'Pending' for new records
       status: statusTypes.PENDING,
-      // Use the form date or today's date if not provided in the form
       date: formData.date || new Date().toISOString().split('T')[0],
       ...formData
     };
 
-    // Keys and values for the potential Receive Register update
-    const dispatchDate = newRecord.date;
-    const dispatchMemoNo = String(newRecordId); // The Consecutive No. of the new Dispatch record
-
-    // 2. Update the allRecords state immutably
-    setAllRecords(prevRecords => {
-      // Create a mutable copy of the overall state for easier manipulation
-      const updatedRecords = {
-        ...prevRecords,
-        [registerTypes.RECEIVE]: { ...prevRecords[registerTypes.RECEIVE] }
-      };
+    setAllRecords(prev => {
+      const updated = { ...prev, [registerTypes.RECEIVE]: { ...prev[registerTypes.RECEIVE] } };
 
       if (selectedRegister === registerTypes.RECEIVE) {
-        // Simple append for Receive Register
-        updatedRecords[selectedRegister][selectedPart] = [
-          ...updatedRecords[selectedRegister][selectedPart],
-          newRecord
-        ];
-        console.log(`✅ New Receive Register record (ID: ${newRecordId}) added to ${selectedPart}.`);
-
+        updated[selectedRegister][selectedPart] = [...(updated[selectedRegister][selectedPart] || []), newRecord];
       } else if (selectedRegister === registerTypes.ISSUED) {
+        updated[selectedRegister] = [...(updated[selectedRegister] || []), newRecord];
 
-        // Append the new Dispatch record
-        updatedRecords[selectedRegister] = [
-          ...updatedRecords[selectedRegister],
-          newRecord
-        ];
-
-        // LINKAGE: Update Receive Register if reference is provided
         const refPart = formData.receiveRefPart;
-        const refNo = formData.receiveRefNo;
+        const refNo = String(formData.receiveRefNo || '').trim();
 
-        // Only proceed if both fields are filled
-        if (refPart && refNo !== undefined && refNo !== null && String(refNo).trim() !== '') {
-          const partRecords = updatedRecords[registerTypes.RECEIVE][refPart];
-
-          if (partRecords && Array.isArray(partRecords)) {
-            // Convert refNo to string and trim — safest way
-            const searchId = String(refNo).trim();
-
-            // Find exact match by id (as string)
-            const matchIndex = partRecords.findIndex(record =>
-              String(record.id).trim() === searchId
-            );
-
-            if (matchIndex !== -1) {
-              const matchedRecord = partRecords[matchIndex];
-
-              // Update the Receive Register record
-              const updatedReceiveRecord = {
-                ...matchedRecord,
-                dispatchMemoNo: String(newRecordId),        // Memo No. = Dispatch Consecutive No.
-                dispatchDate: newRecord.date,               // Dispatch Date
-                status: statusTypes.COMPLETED               // Mark as replied
-              };
-
-              // Immutably update the array
-              updatedRecords[registerTypes.RECEIVE][refPart] = [
-                ...partRecords.slice(0, matchIndex),
-                updatedReceiveRecord,
-                ...partRecords.slice(matchIndex + 1)
-              ];
-
-              console.log(`LINKED: Receive #${searchId} (Part ${refPart}) → Updated with Memo No. ${newRecordId}`);
-            } else {
-              console.warn(`NOT FOUND: No Receive Record with ID ${searchId} in ${refPart}`);
-            }
+        if (refPart && refNo) {
+          const partRecords = updated[registerTypes.RECEIVE][refPart] || [];
+          const idx = partRecords.findIndex(r => String(r.id).trim() === refNo);
+          if (idx !== -1) {
+            partRecords[idx] = {
+              ...partRecords[idx],
+              dispatchMemoNo: String(newRecordId),
+              dispatchDate: newRecord.date,
+              status: statusTypes.COMPLETED
+            };
+            updated[registerTypes.RECEIVE][refPart] = [...partRecords];
           }
         }
       }
-
-      return updatedRecords;
+      return updated;
     });
 
-    // 4. Close the form
     setIsFormOpen(false);
   };
 
-  if (isPrintView) {
+  // ONLY render PrintView when printing
+  if (isPrinting) {
     return (
       <PrintView
         selectedRegister={selectedRegister}
-        selectedPart={selectedPart}
-        records={currentRecords}
+        selectedPart={selectedRegister === registerTypes.RECEIVE ? selectedPart : null}
+        records={recordsToPrint}
         onClose={closePrintView}
       />
     );
   }
 
+  // Normal UI when NOT printing
   return (
     <div className="min-h-screen bg-gray-50">
       <Header
@@ -192,10 +150,11 @@ function App() {
         <RecordTable
           selectedRegister={selectedRegister}
           records={currentRecords}
-          onPrint={handlePrint}
+          onPrint={handlePrintClick}
         />
       </main>
 
+      {/* Modals */}
       <CreateForm
         selectedRegister={selectedRegister}
         selectedPart={selectedPart}
@@ -203,6 +162,14 @@ function App() {
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleNewRecord}
+      />
+
+      {/* 3. UPDATED PROPS TO MATCH EXTERNAL COMPONENT */}
+      <PrintRangeModal
+        isOpen={isPrintRangeModalOpen}
+        onClose={() => setIsPrintRangeModalOpen(false)}
+        totalRecords={currentRecords} // Changed from allRecords/currentRecords complexity to just passing the list
+        onConfirm={handlePrintRange}  // Changed from onPrintRange to onConfirm
       />
     </div>
   );

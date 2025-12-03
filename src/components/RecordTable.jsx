@@ -115,7 +115,9 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
   const getStatusIcon = (status) => {
     switch (status) {
       case statusTypes.ACTION_TAKEN:
+        return <i className="fa-solid fa-circle-check"></i>;
       case statusTypes.COMPLETED:
+        return <i class="fa-solid fa-check-double"></i>;
       case statusTypes.ACKNOWLEDGED:
         return <i className="fa-solid fa-circle-check"></i>;
       case statusTypes.PENDING:
