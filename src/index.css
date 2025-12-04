@@ -6,20 +6,31 @@ body {
 
 @media print {
   @page {
-    margin: 0cm;
-    size: A4;
+    size: landscape;
+    margin-top: 2.3cm;
+    margin-right: 0.5cm !important;
+    margin-bottom: 0.5cm;
+    margin-left: 0.5cm !important;
   }
-  
-  
+
+
   body {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
-  
+
   .no-print {
     display: none !important;
   }
-}
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+} 
 
 /* Smooth scrolling */
 html {
@@ -46,9 +57,20 @@ html {
 
 /* public/index.css or App.css */
 @keyframes slideInRight {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
+
 @keyframes slideOutRight {
-  to { transform: translateX(100%); opacity: 0; }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }

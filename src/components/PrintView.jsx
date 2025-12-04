@@ -24,7 +24,6 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
     };
   }, [onClose]);
 
-  // In PrintView.jsx - REPLACE the existing getAllColumnNames function with this:
   const getAllColumnNames = () => {
     if (selectedRegister === registerTypes.RECEIVE) {
       return [
@@ -55,8 +54,8 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
         'No. & title of collection',
         'No. of file within the collection',
         'No. and date of reply receive',
-        'Part No.',           // NOW INCLUDED
-        'Ref No.',            // NOW INCLUDED
+        'Part No.',
+        'Ref No.',
         'Reminder No.',
         'Reminder Date',
         'Rs.',
@@ -69,70 +68,78 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
   };
 
   const allColumns = getAllColumnNames();
+  // Calculate total columns for the colspan of the header
+  const totalColumns = allColumns.length > 0 ? allColumns.length : 1;
 
   return (
     <>
-      {/* CSS for Landscape Printing */}
+      {/* --- ADDED THIS STYLE BLOCK TO REMOVE BROWSER MARGINS --- */}
       <style>
         {`
-    @media print {
-      @page {
-        size: landscape;
-        margin: 0.5cm;
-      }
-      body {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      /* Increased top padding for print specifically */
-      .print\\:pt-10 {
-        padding-top: 5rem; 
-      }
-      .print\\:p-4 {
-        padding: 1rem;
-      }
-      .print\\:m-0 {
-        margin: 0;
-      }
-    }
-  `}
+          @media print {
+            @page {
+              margin: 0; /* This removes the browser's default left/right/top/bottom margins */
+              size: auto;
+            }
+            body {
+              margin: 0;
+              padding: 0;
+            }
+          }
+        `}
       </style>
 
-      {/* Added print:pt-10 to add more space at the very top of the page */}
-      <div className="p-8 bg-white print:p-4 print:pt-16 print:m-0">
+      {/* Updated ClassName:
+         1. w-full: Forces width to 100%
+         2. print:w-full: Ensures print view uses full width
+         3. print:max-w-none: Overrides any max-width constraints from parent components
+         4. print:p-0: Removes all padding inside the div
+      */}
+      <div className="p-8 bg-white w-full print:w-full print:max-w-none print:p-0 print:m-0">
+        
+        {/* Extra breathing space at the top - visible in print */}
+        <div className="h-0"></div>
 
-        {/* Header Container */}
-        <div className="mb-6 border-b border-gray-300 pb-4">
-
-          {/* New Row: Year (Left) and Department (Right) */}
-
-
-          {/* Main Title - Centered */}
-          <div className="text-center mt-4">
-            <span className="text-2xl font-bold text-gray-900">
-              Register of Letters {selectedRegister?.replace(' Register', '')}
-            </span>
-            {selectedRegister === registerTypes.RECEIVE && selectedPart && (
-              <span className="text-xl border border-black-1 rounded-md px-2 ml-2 font-semibold">
-                {selectedPart}
-              </span>
-            )}
-          </div>
-
-          <div className="flex justify-between items-center w-full font-bold text-gray-800 text-sm uppercase">
-            <div className="inline-block border-b-2 border-dotted border-black">
-              Year: {currentYear}
-            </div>
-            <div className="inline-block border-b-2 border-dotted border-black">
-              Department: MPB
-            </div>
-          </div>
-        </div>
-
-        {/* Table */}
         {records.length > 0 ? (
           <table className="w-full border-collapse border border-gray-300 text-sm">
             <thead>
+              {/* --- HEADER INSIDE THEAD --- */}
+              <tr className="border-b-0">
+                <th colSpan={totalColumns} className="p-0 border-x border-t border-gray-300 bg-white">
+                  
+                  {/* Header Content Container */}
+                  <div className="mb-2 pb-2 px-4 pt-4">
+                    {/* Single Line: Year (Left) | Title (Center) | Department (Right) */}
+                    <div className="flex items-center justify-between text-sm font-bold uppercase text-gray-800">
+                      
+                      {/* Left: Year */}
+                      <div className="border-b-2 border-dotted border-black whitespace-nowrap">
+                        Year: {currentYear}
+                      </div>
+
+                      {/* Center: Main Title */}
+                      <div className="text-center flex-1 px-4">
+                        <div className="text-2xl font-bold text-gray-900 leading-tight">
+                          Register of Letters {selectedRegister?.replace(' Register', '')}
+                          {selectedRegister === registerTypes.RECEIVE && selectedPart && (
+                            <span className="text-xl border border-black rounded-md px-2 ml-2 font-semibold align-middle inline-block">
+                              {selectedPart}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right: Department */}
+                      <div className="border-b-2 border-dotted border-black whitespace-nowrap">
+                        Department: MPB
+                      </div>
+                    </div>
+                  </div>
+                  
+                </th>
+              </tr>
+
+              {/* Existing Table Headers */}
               {tableHeaders.map((row, rowIndex) => (
                 <tr key={rowIndex}>
                   {row.map((header, headerIndex) => (
@@ -145,13 +152,13 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
                       {header.name}
                     </th>
                   ))}
-
                 </tr>
               ))}
             </thead>
+            
             <tbody>
               {records.map((record, index) => (
-                <tr key={record.id} className="bg-white">
+                <tr key={record.id} className="bg-white break-inside-avoid">
                   {allColumns.map((columnName, colIndex) => {
                     const fieldName = fieldMappings[columnName];
                     const value = fieldName ? record[fieldName] : null;
