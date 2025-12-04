@@ -119,11 +119,11 @@ export const registerFieldMappings = {
 export const registerFields = {
   [registerTypes.RECEIVE]: [
     // Note: 'Consecutive No.' is auto-generated as 'id', so it's not in the form
-    { name: 'date', label: 'Date of receipt in office', type: 'date', required: true },
-    { name: 'from', label: 'From whom received', type: 'text', required: true },
+    { name: 'date', label: 'Date of receipt in office', type: 'date' },
+    { name: 'from', label: 'From whom received', type: 'text' },
     { name: 'referenceNo', label: 'Reference Number', type: 'text' },
     { name: 'referenceDate', label: 'Reference Date', type: 'date' },
-    { name: 'subject', label: 'Short subject', type: 'textarea', rows: 3, required: true },
+    { name: 'subject', label: 'Short subject', type: 'textarea', rows: 3 },
     { name: 'reminderNumber', label: 'Reminder Number', type: 'text' },
     { name: 'reminderDate', label: 'Reminder Date', type: 'date' },
     { name: 'fileNo', label: 'File No.', type: 'text' },
@@ -134,10 +134,9 @@ export const registerFields = {
       name: 'actionType', 
       label: 'Type of action', 
       type: 'select', 
-      options: ['Returnable', 'Not Returnable', 'Attached to File'],
-      required: true
+      options: ['Returnable', 'Not Returnable', 'Attached to File']
     },
-    { name: 'dispatchMemoNo', label: 'Dispatch Memo No.', type: 'text' },
+    { name: 'dispatchMemoNo', label: 'Dispatch Memo No.', type: 'number' },
     { name: 'dispatchDate', label: 'Dispatch Date', type: 'date' },
     { 
       name: 'endorsedTo', 
@@ -148,14 +147,13 @@ export const registerFields = {
         'SI Bikash Sen',
         'SI Sadhana Singha', 
         'SI Ummey Salma',
-      ],
-      required: true
+      ]
     }
   ],
   [registerTypes.ISSUED]: [
-    { name: 'date', label: 'Date', type: 'date', required: true },
-    { name: 'to', label: 'To whom addressed', type: 'text', required: true },
-    { name: 'subject', label: 'Short subject', type: 'textarea', rows: 3, required: true },
+    { name: 'date', label: 'Date', type: 'date' },
+    { name: 'to', label: 'To whom addressed', type: 'text' },
+    { name: 'subject', label: 'Short subject', type: 'textarea', rows: 3 },
     { name: 'fileSerialNo', label: 'File No. & Serial No.', type: 'text' },
     { name: 'collectionTitle', label: 'No. & title of collection', type: 'text' },
     { name: 'fileInCollection', label: 'No. of file within the collection', type: 'text' },
@@ -186,8 +184,7 @@ export const registerFields = {
       name: 'officerName',
       label: 'Name of the Officer',
       type: 'select',
-      options: ['SI Rupali Santra', 'SI Bikash Sen', 'SI Sadhana Singha', 'SI Ummey Salma'],
-      required: true
+      options: ['SI Rupali Santra', 'SI Bikash Sen', 'SI Sadhana Singha', 'SI Ummey Salma']
     },
     { name: 'remarks', label: 'Remarks', type: 'textarea' }
   ]

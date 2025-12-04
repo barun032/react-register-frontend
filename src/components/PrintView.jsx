@@ -6,6 +6,9 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
   const tableHeaders = registerTableHeaders[selectedRegister] || [];
   const fieldMappings = registerFieldMappings[selectedRegister] || {};
 
+  // Get Current Year
+  const currentYear = new Date().getFullYear();
+
   useEffect(() => {
     const printTimer = setTimeout(() => {
       window.print();
@@ -22,49 +25,48 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
   }, [onClose]);
 
   // In PrintView.jsx - REPLACE the existing getAllColumnNames function with this:
-
- const getAllColumnNames = () => {
-  if (selectedRegister === registerTypes.RECEIVE) {
-    return [
-      'Consecutive No.',
-      'Date of receipt in office',
-      'From whom received',
-      'Reference Number',
-      'Reference Date',
-      'Short subject',
-      'Reminder Number',
-      'Reminder Date',
-      'File No.',
-      'Sl. No.',
-      'No. of the Collection',
-      'No. of the file within the collection',
-      'Type of action',
-      'Memo No.',
-      'Dispatch Date',
-      'Endorsed To'
-    ];
-  } else if (selectedRegister === registerTypes.ISSUED) {
-    return [
-      'Consecutive No.',
-      'Date',
-      'To whom addressed',
-      'Short subject',
-      'File No. & Serial No.',
-      'No. & title of collection',
-      'No. of file within the collection',
-      'No. and date of reply receive',
-      'Part No.',           // NOW INCLUDED
-      'Ref No.',            // NOW INCLUDED
-      'Reminder No.',
-      'Reminder Date',
-      'Rs.',
-      'P.',
-      'Remarks',
-      'Name of the Officer.'
-    ];
-  }
-  return [];
-};
+  const getAllColumnNames = () => {
+    if (selectedRegister === registerTypes.RECEIVE) {
+      return [
+        'Consecutive No.',
+        'Date of receipt in office',
+        'From whom received',
+        'Reference Number',
+        'Reference Date',
+        'Short subject',
+        'Reminder Number',
+        'Reminder Date',
+        'File No.',
+        'Sl. No.',
+        'No. of the Collection',
+        'No. of the file within the collection',
+        'Type of action',
+        'Memo No.',
+        'Dispatch Date',
+        'Endorsed To'
+      ];
+    } else if (selectedRegister === registerTypes.ISSUED) {
+      return [
+        'Consecutive No.',
+        'Date',
+        'To whom addressed',
+        'Short subject',
+        'File No. & Serial No.',
+        'No. & title of collection',
+        'No. of file within the collection',
+        'No. and date of reply receive',
+        'Part No.',           // NOW INCLUDED
+        'Ref No.',            // NOW INCLUDED
+        'Reminder No.',
+        'Reminder Date',
+        'Rs.',
+        'P.',
+        'Remarks',
+        'Name of the Officer.'
+      ];
+    }
+    return [];
+  };
 
   const allColumns = getAllColumnNames();
 
@@ -82,6 +84,10 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
+      /* Increased top padding for print specifically */
+      .print\\:pt-10 {
+        padding-top: 5rem; 
+      }
       .print\\:p-4 {
         padding: 1rem;
       }
@@ -92,13 +98,35 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
   `}
       </style>
 
-      <div className="p-8 bg-white print:p-4 print:m-0">
-        {/* Header */}
-        <div className="text-center mb-6 border-b border-gray-300 pb-4">
-          <span className="text-2xl font-bold text-gray-900 mb-2">{selectedRegister}</span>
-          {selectedRegister === registerTypes.RECEIVE && selectedPart && (
-            <span className="text-xl font-semibold text-gray-700 mb-2">-{selectedPart}</span>
-          )}
+      {/* Added print:pt-10 to add more space at the very top of the page */}
+      <div className="p-8 bg-white print:p-4 print:pt-16 print:m-0">
+
+        {/* Header Container */}
+        <div className="mb-6 border-b border-gray-300 pb-4">
+
+          {/* New Row: Year (Left) and Department (Right) */}
+
+
+          {/* Main Title - Centered */}
+          <div className="text-center mt-4">
+            <span className="text-2xl font-bold text-gray-900">
+              Register of Letters {selectedRegister?.replace(' Register', '')}
+            </span>
+            {selectedRegister === registerTypes.RECEIVE && selectedPart && (
+              <span className="text-xl border border-black-1 rounded-md px-2 ml-2 font-semibold">
+                {selectedPart}
+              </span>
+            )}
+          </div>
+
+          <div className="flex justify-between items-center w-full font-bold text-gray-800 text-sm uppercase">
+            <div className="inline-block border-b-2 border-dotted border-black">
+              Year: {currentYear}
+            </div>
+            <div className="inline-block border-b-2 border-dotted border-black">
+              Department: MPB
+            </div>
+          </div>
         </div>
 
         {/* Table */}
@@ -112,7 +140,6 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
                       key={headerIndex}
                       rowSpan={header.rowspan || 1}
                       colSpan={header.colspan || 1}
-                      // Removed 'bg-gray-100' and replaced with 'bg-white'
                       className={`border border-gray-300 px-3 py-2 text-center font-bold bg-white`}
                     >
                       {header.name}
@@ -124,12 +151,9 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
             </thead>
             <tbody>
               {records.map((record, index) => (
-                // Removed alternating background colors logic
                 <tr key={record.id} className="bg-white">
                   {allColumns.map((columnName, colIndex) => {
                     const fieldName = fieldMappings[columnName];
-
-                    // Ensure fieldName is a valid key from registerData before accessing record
                     const value = fieldName ? record[fieldName] : null;
 
                     return (

@@ -74,7 +74,7 @@ const Header = ({ selectedRegister, selectedPart, onRegisterChange, onPartChange
             {/* Create Button */}
             <button
               onClick={onCreateClick}
-              className="w-full sm:w-auto px-5 py-2.5 bg-slate-700 text-white font-medium rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 flex items-center justify-center space-x-2"
+              className="w-full sm:w-auto px-5 py-2.5 bg-slate-700 text-white font-medium cursor-pointer rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 flex items-center justify-center space-x-2"
             >
               <span>+</span>
               <span>{getCreateButtonText()}</span>

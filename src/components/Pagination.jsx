@@ -70,7 +70,7 @@ const Pagination = ({
           <button
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className="px-3 py-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-1.5 rounded border cursor-pointer border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Previous
           </button>
@@ -82,7 +82,7 @@ const Pagination = ({
               ) : (
                 <button
                   onClick={() => onPageChange(page)}
-                  className={`w-9 h-9 rounded font-medium transition-colors ${
+                  className={`w-9 h-9 rounded font-medium transition-colors cursor-pointer ${
                     currentPage === page
                       ? 'bg-slate-700 text-white'
                       : 'bg-white border border-gray-300 hover:bg-gray-50'
@@ -97,7 +97,7 @@ const Pagination = ({
           <button
             onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
-            className="px-3 py-1.5 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-1.5 rounded border cursor-pointer border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Next
           </button>

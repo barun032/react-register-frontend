@@ -194,7 +194,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
                 <div className="flex items-center gap-4">
                    <div className="text-right hidden sm:block">
                       <span className="block text-xs font-semibold text-slate-400 uppercase">{selectedRegister}</span>
-                      {selectedPart && <span className="block text-[10px] font-bold text-slate-300 bg-slate-600 px-2 py-0.5 rounded-full mt-1">{selectedPart}</span>}
+                      {selectedPart && <span className="block text-[12px] font-bold text-slate-300 bg-slate-600 px-2 py-0.5 rounded-full mt-1">{selectedPart}</span>}
                    </div>
                    <div className="w-20 h-12 flex items-center justify-center bg-white border-2 border-slate-300 rounded-lg text-2xl font-bold text-slate-800 shadow-sm">
                       {nextConsecutiveNumber}

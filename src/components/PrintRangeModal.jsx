@@ -89,12 +89,10 @@ const PrintRangeModal = ({ isOpen, onClose, totalRecords, onConfirm }) => {
 
           <div className="p-8 space-y-6">
             <div className="text-center">
-              <p className="text-lg font-medium text-gray-800">
+              <p className="text-2xl font-medium text-gray-800">
                 Total Records: <span className="font-bold text-slate-700">{maxNo}</span>
               </p>
-              <p className="text-sm text-gray-600">
-                Filtered: <strong>{totalRecords.length}</strong> record{totalRecords.length !== 1 ? 's' : ''}
-              </p>
+              
             </div>
 
             <div className="grid grid-cols-2 gap-6">
@@ -123,7 +121,7 @@ const PrintRangeModal = ({ isOpen, onClose, totalRecords, onConfirm }) => {
             {previewCount > 0 && (
               <div className="p-5 bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-xl text-center">
                 <p className="text-emerald-800 font-bold text-xl">
-                  Will print <span className="text-3xl text-emerald-600">{previewCount}</span> record{previewCount !== 1 ? 's' : ''}
+                  Printing<span className="text-3xl mx-2 text-emerald-600">{previewCount}</span>Record{previewCount !== 1 ? 's' : ''}<span className='px-1'>...</span>
                 </p>
               </div>
             )}
@@ -131,27 +129,19 @@ const PrintRangeModal = ({ isOpen, onClose, totalRecords, onConfirm }) => {
             <div className="flex gap-4">
               <button
                 onClick={onClose}
-                className="flex-1 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition"
+                className="flex-1 py-4 border-2 cursor-pointer border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirm}
-                className="flex-1 py-4 bg-gradient-to-r from-slate-700 to-slate-900 text-white rounded-xl font-bold hover:from-slate-800 hover:to-black transition shadow-lg flex items-center justify-center gap-3"
+                className="flex-1 py-4 bg-gradient-to-r cursor-pointer from-slate-700 to-slate-900 text-white rounded-xl font-bold hover:from-slate-800 hover:to-black transition shadow-lg flex items-center justify-center gap-3"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
-                Print Range
+                Print Now
               </button>
-            </div>
-
-            <div className="flex justify-center gap-6 text-sm font-medium">
-              <button onClick={() => { setStartNo('1'); setEndNo(maxNo.toString()); }} 
-                      className="text-slate-600 hover:text-slate-800 underline">Select All</button>
-              <span className="text-gray-400">•</span>
-              <button onClick={() => { setStartNo('1'); setEndNo(''); }} 
-                      className="text-slate-600 hover:text-slate-800 underline">Clear</button>
             </div>
           </div>
         </div>
