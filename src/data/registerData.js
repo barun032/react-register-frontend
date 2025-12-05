@@ -119,8 +119,8 @@ export const registerFieldMappings = {
 export const registerFields = {
   [registerTypes.RECEIVE]: [
     // Note: 'Consecutive No.' is auto-generated as 'id', so it's not in the form
+    { name: 'from', label: 'From whom received', type: 'textarea', rows: 3 },
     { name: 'date', label: 'Date of receipt in office', type: 'date' },
-    { name: 'from', label: 'From whom received', type: 'text' },
     { name: 'referenceNo', label: 'Reference Number', type: 'text' },
     { name: 'referenceDate', label: 'Reference Date', type: 'date' },
     { name: 'subject', label: 'Short subject', type: 'textarea', rows: 3 },
