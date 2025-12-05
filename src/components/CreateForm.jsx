@@ -4,7 +4,7 @@ import { registerFields, registerTypes } from '../data/registerData';
 
 const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isOpen, onClose, onSubmit }) => {
 
-  // --- LOGIC SECTION (Unchanged) ---
+  // --- LOGIC SECTION ---
   const initializeFormData = () => {
     const fields = registerFields[selectedRegister] || [];
     const initialData = {};
@@ -61,29 +61,89 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     onClose();
   };
 
-  // --- STYLING SECTION (Updated to match PrintRangeModal) ---
+  // 1. DEFINED PRESETS HERE - Keys match 'name' in registerData.js
+  const fieldPresets = {
+    to: [
+      "To\nThe Director of Information\nDepartment of Information & Cultural Affairs\nGovt. of West Bengal\nNabanna, 9th Floor\n325, Sarat Chatterjee Road,\nMandirtala, Shibpur\nHowrah-711102",
+      "To\nThe Deputy Director General (Engg.)\nAkashvani Kolkata\nAkashvani Bhavan\nGostho Paul Sarani, near Eden Gardens,\nKolkata-700001",
+      "To\nThe Deputy Director General (Engg.)\nDoordarshan Kendra, Kolkata\nDoordarshan Bhavan,\n18/3, Uday Sankar Sarani,\nGolf Green,\nKolkata-700095",
+    ],
+    subject: [
+      "Forwarding Letter/Challan for Memo No(s) .......................... /MPB to .......................... /MPB for wide publication of the information of missing/recoverd person(s) / un-identified dead body(s) through News Papers/Doordarshan Kendra Kolkata/Akashvani Kolkata",
+      "Information of missing/recovered person/un-idenfied dead body.......................for wide publication through News Papers/Doordarshan Kendra Kolkata/Akashvani Kolkata",
+      "Ditto for missing/recovered person/un-identified dead body..................................."
+    ],
+  };
+
+  // --- STYLING SECTION ---
 
   const renderField = (field) => {
     const value = formData[field.name] || '';
-
-    // Updated Input Style: Thicker border, rounded-xl, focus ring like PrintModal
     const commonClasses = "w-full px-4 py-3 text-gray-700 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-slate-600 focus:ring-4 focus:ring-slate-100 transition-all outline-none placeholder-gray-400";
+
+    // 2. CONDITIONAL CHECK: Only assign presets if the register is DISPATCH (ISSUED)
+    const isDispatchRegister = selectedRegister === registerTypes.ISSUED;
+    
+    // Only look up presets if it's the Dispatch Register
+    const presets = isDispatchRegister ? fieldPresets[field.name] : null;
+
+    // 3. Reusable Preset Buttons Component (No change inside this function)
+    const renderPresetButtons = () => {
+      if (!presets) return null;
+      return (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {presets.map((text, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                handleInputChange(field.name, text);
+                // Logic to auto-focus the input after clicking
+                setTimeout(() => {
+                  const el = document.querySelector(`[name="${field.name}"]`) || 
+                             document.querySelector(`textarea[name="${field.name}"]`);
+                  if (el) el.focus();
+                }, 50);
+              }}
+              className={`
+                px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-200
+                ${value === text
+                  ? 'bg-slate-700 text-white border-slate-700 shadow-sm'
+                  : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 hover:border-gray-400'
+                }
+              `}
+            >
+              {text.length > 40 ? text.substring(0, 37) + '...' : text}
+            </button>
+          ))}
+        </div>
+      );
+    };
 
     switch (field.type) {
       case 'textarea':
         return (
-          <textarea
-            value={value}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            rows={3}
-            className={`${commonClasses} resize-none`}
-            placeholder={`Enter ${field.label.toLowerCase()}...`}
-          />
+          <div className="space-y-1">
+            {/* Render presets above textarea */}
+            {renderPresetButtons()} 
+            <textarea
+              name={field.name}
+              value={value}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              rows={3}
+              className={`${commonClasses} resize-none`}
+              placeholder={`Enter ${field.label.toLowerCase()}...`}
+            />
+          </div>
         );
+
+      // ... (case 'select' and case 'date' remain the same)
+      
       case 'select':
         return (
           <div className="relative">
             <select
+              name={field.name}
               value={value}
               onChange={(e) => handleInputChange(field.name, e.target.value)}
               className={`${commonClasses} appearance-none pr-10 cursor-pointer`}
@@ -100,6 +160,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
             </div>
           </div>
         );
+
       case 'date':
         return (
           <div
@@ -111,6 +172,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
           >
             <input
               ref={el => inputRefs.current[field.name] = el}
+              name={field.name}
               type="date"
               value={value}
               onChange={(e) => handleInputChange(field.name, e.target.value)}
@@ -118,9 +180,11 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
             />
           </div>
         );
+
       case 'number':
         return (
           <input
+            name={field.name}
             type="number"
             value={value}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
@@ -128,33 +192,45 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
             placeholder={`0`}
           />
         );
+
       default:
+        // Standard Text Input (handles 'to', etc.)
         return (
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            className={commonClasses}
-            placeholder={`Enter ${field.label.toLowerCase()}...`}
-          />
+          <div className="space-y-1">
+            {/* Render presets above input */}
+            {renderPresetButtons()}
+            
+            <input
+              name={field.name}
+              type="text"
+              value={value}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              className={commonClasses}
+              placeholder={
+                presets
+                  ? 'Click a preset above or type your own...'
+                  : `Enter ${field.label.toLowerCase()}...`
+              }
+            />
+          </div>
         );
     }
   };
 
-  // --- MODAL JSX (Updated structure) ---
+  // --- MODAL JSX ---
   const modalContentJSX = (
     <>
       {/* Blurred Backdrop */}
-      <div 
-        className="fixed inset-0 backdrop-blur-sm z-50 transition-all duration-300" 
+      <div
+        className="fixed inset-0 backdrop-blur-sm z-50 transition-all duration-300"
         onClick={handleClose}
       />
 
       {/* Modal Container */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-300">
-          
-          {/* Header - Gradient Style */}
+
+          {/* Header */}
           <div className="bg-gradient-to-r from-slate-700 to-slate-900 px-8 py-6 text-white shrink-0">
             <div className="flex justify-between items-center">
               <div>
@@ -180,7 +256,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
           {/* Scrollable Form Content */}
           <div className="overflow-y-auto p-8 custom-scrollbar">
             <form onSubmit={handleSubmit}>
-              
+
               {/* Consecutive Number Display */}
               <div className="mb-8 p-5 bg-gradient-to-r from-slate-50 to-gray-50 border-2 border-slate-200 rounded-xl flex items-center justify-between">
                 <div>
@@ -192,13 +268,13 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                   <div className="text-right hidden sm:block">
-                      <span className="block text-xs font-semibold text-slate-400 uppercase">{selectedRegister}</span>
-                      {selectedPart && <span className="block text-[12px] font-bold text-slate-300 bg-slate-600 px-2 py-0.5 rounded-full mt-1">{selectedPart}</span>}
-                   </div>
-                   <div className="w-20 h-12 flex items-center justify-center bg-white border-2 border-slate-300 rounded-lg text-2xl font-bold text-slate-800 shadow-sm">
-                      {nextConsecutiveNumber}
-                   </div>
+                  <div className="text-right hidden sm:block">
+                    <span className="block text-xs font-semibold text-slate-400 uppercase">{selectedRegister}</span>
+                    {selectedPart && <span className="block text-[12px] font-bold text-slate-300 bg-slate-600 px-2 py-0.5 rounded-full mt-1">{selectedPart}</span>}
+                  </div>
+                  <div className="w-20 h-12 flex items-center justify-center bg-white border-2 border-slate-300 rounded-lg text-2xl font-bold text-slate-800 shadow-sm">
+                    {nextConsecutiveNumber}
+                  </div>
                 </div>
               </div>
 
@@ -248,7 +324,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
                 >
                   <span>Create Record</span>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                 </button>
               </div>
@@ -259,7 +335,6 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     </>
   );
 
-  // Unchanged Toast
   const ToastNotification = () => {
     const baseClasses = "fixed top-5 right-5 max-w-sm w-full shadow-lg rounded-xl pointer-events-auto ring-1 ring-black ring-opacity-5 transition-all duration-500 ease-in-out z-[100] p-4 flex items-center";
     const activeClasses = `opacity-100 translate-x-0 bg-emerald-500 ring-emerald-600 text-white`;

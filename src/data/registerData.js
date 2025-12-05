@@ -152,7 +152,7 @@ export const registerFields = {
   ],
   [registerTypes.ISSUED]: [
     { name: 'date', label: 'Date', type: 'date' },
-    { name: 'to', label: 'To whom addressed', type: 'text' },
+    { name: 'to', label: 'To whom addressed', type: 'textarea', rows: 3 },
     { name: 'subject', label: 'Short subject', type: 'textarea', rows: 3 },
     { name: 'fileSerialNo', label: 'File No. & Serial No.', type: 'text' },
     { name: 'collectionTitle', label: 'No. & title of collection', type: 'text' },
