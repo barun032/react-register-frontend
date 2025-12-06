@@ -4,6 +4,21 @@ import { registerTableHeaders, registerFieldMappings, registerTypes, statusTypes
 import Pagination from './Pagination';
 import TableToolbar from './TableToolbar';
 
+// 1. DEFINE COLUMN WIDTHS HERE
+// keys must match the exact text in your table headers
+const columnConfig = {
+  // Common
+  'Consecutive No.': 'w-16 min-w-[60px]', // Fixed narrow width
+  'Date': 'min-w-[120px]',
+  'Short subject': 'min-w-[350px] max-w-[500px]', // Wide column for subject
+  'Remarks': 'min-w-[200px]',
+  'From whom received': 'min-w-[200px]',
+  'To whom addressed': 'min-w-[200px]', 
+  'Name of the Officer.': 'min-w-[150px]',
+  'Date of receipt in office': 'min-w-[120px]',
+  'Reference Date':'min-w-[120px]',
+};
+
 const getStatusFromRecord = (record) => {
   if (record.dispatchMemoNo && record.dispatchMemoNo.trim() !== '') {
     return statusTypes.COMPLETED || 'Completed';
@@ -39,7 +54,6 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
   const processedRecords = useMemo(() => {
     let result = [...records];
 
-    // Date Range Filter
     if (dateFrom || dateTo) {
       result = result.filter(record => {
         const recordDate = record.date ? new Date(record.date) : null;
@@ -58,7 +72,6 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
       });
     }
 
-    // Search filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(record => {
@@ -71,7 +84,6 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
       });
     }
 
-    // Sort by Consecutive No.
     result.sort((a, b) => {
       const idA = parseInt(a.id || '0', 10);
       const idB = parseInt(b.id || '0', 10);
@@ -81,7 +93,6 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
     return result;
   }, [records, searchQuery, dateFrom, dateTo, selectedRegister, sortOrder]);
 
-  // Reset page on any filter change
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedRegister, records, searchQuery, dateFrom, dateTo, rowsPerPage]);
@@ -117,7 +128,7 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
       case statusTypes.ACTION_TAKEN:
         return <i className="fa-solid fa-circle-check"></i>;
       case statusTypes.COMPLETED:
-        return <i class="fa-solid fa-check-double"></i>;
+        return <i className="fa-solid fa-check-double"></i>;
       case statusTypes.ACKNOWLEDGED:
         return <i className="fa-solid fa-circle-check"></i>;
       case statusTypes.PENDING:
@@ -166,7 +177,6 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
           selectedRegister={selectedRegister}
         />
 
-        {/* Rest of your table (unchanged) */}
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse">
             <thead className="bg-gray-50">
@@ -174,14 +184,19 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
                 <tr key={rowIndex}>
                   {row.map((header, headerIndex) => {
                     const isConsecutiveHeader = header.name === 'Consecutive No.';
+                    // 2. GET CUSTOM WIDTH CLASS
+                    const widthClass = columnConfig[header.name] || columnConfig.default;
+                    
                     return (
                       <th
                         key={headerIndex}
                         rowSpan={header.rowspan || 1}
                         colSpan={header.colspan || 1}
                         onClick={isConsecutiveHeader ? toggleSort : undefined}
-                        className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 ${header.className || ''
-                          } ${isConsecutiveHeader ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}`}
+                        // 3. APPLY WIDTH CLASS BELOW
+                        className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 
+                          ${widthClass} ${header.className || ''} 
+                          ${isConsecutiveHeader ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}`}
                       >
                         <div className="flex items-center justify-center gap-1">
                           {header.name}
@@ -199,15 +214,16 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
                       </th>
                     );
                   })}
+                  {/* 4. APPLY WIDTH TO STATUS COLUMN AS WELL */}
                   {rowIndex === 0 && selectedRegister === registerTypes.RECEIVE && (
-                    <th rowSpan={2} className="px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200">
+                    <th rowSpan={2} className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 ${columnConfig['Status']}`}>
                       Status
                     </th>
                   )}
                 </tr>
               ))}
               {tableHeaders.length === 1 && selectedRegister === registerTypes.RECEIVE && (
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200">
+                <th className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 ${columnConfig['Status']}`}>
                   Status
                 </th>
               )}
@@ -274,7 +290,8 @@ const RecordTable = ({ selectedRegister, records, onPrint }) => {
                       }
 
                       return (
-                        <td key={colIndex} className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 border border-gray-200">
+                        // Optional: You can also add max-w classes here if you want to truncate text
+                        <td key={colIndex} className="px-4 py-3 whitespace-normal text-sm text-gray-700 border border-gray-200">
                           {value || '-'}
                         </td>
                       );
