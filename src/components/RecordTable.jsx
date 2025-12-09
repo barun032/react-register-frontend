@@ -1,5 +1,6 @@
 // src/components/RecordTable.jsx
 import React, { useState, useMemo, useEffect } from 'react';
+import { useRegister } from '../context/RegisterContext';
 import { registerTableHeaders, registerFieldMappings, registerTypes, statusTypes } from '../data/registerData';
 import Pagination from './Pagination';
 import TableToolbar from './TableToolbar';
@@ -39,7 +40,9 @@ const getStatusFromRecord = (record) => {
   }
 };
 
-const RecordTable = ({ selectedRegister, records, onPrint }) => {
+const RecordTable = ({ onPrint }) => {
+  const { currentRecords: records, selectedRegister } = useRegister();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');

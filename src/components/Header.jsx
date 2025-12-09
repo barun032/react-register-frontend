@@ -1,8 +1,16 @@
-// src/components/Header.js
+// src/components/Header.jsx
 import React from 'react';
 import { registerTypes, receivePartTypes } from '../data/registerData';
+import { useRegister } from '../context/RegisterContext';
 
-const Header = ({ selectedRegister, selectedPart, onRegisterChange, onPartChange, onCreateClick }) => {
+const Header = ({ onCreateClick }) => {
+  const { 
+    selectedRegister, 
+    setSelectedRegister, 
+    selectedPart, 
+    setSelectedPart 
+  } = useRegister();
+
   const getCreateButtonText = () => {
     switch (selectedRegister) {
       case registerTypes.RECEIVE:
@@ -28,13 +36,13 @@ const Header = ({ selectedRegister, selectedPart, onRegisterChange, onPartChange
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-3 items-center w-full sm:w-auto">
-            {/* Part Dropdown - Only show for Receive Register */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            {/* Part Selector (Only for Receive Register) */}
             {selectedRegister === registerTypes.RECEIVE && (
               <div className="relative w-full sm:w-40">
                 <select
                   value={selectedPart}
-                  onChange={(e) => onPartChange(e.target.value)}
+                  onChange={(e) => setSelectedPart(e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 appearance-none cursor-pointer focus:border-slate-500 focus:ring-1 focus:ring-slate-500 focus:outline-none"
                 >
                   {Object.values(receivePartTypes).map((part) => (
@@ -50,12 +58,12 @@ const Header = ({ selectedRegister, selectedPart, onRegisterChange, onPartChange
                 </div>
               </div>
             )}
-            
-            {/* Register Dropdown */}
-            <div className="relative w-full sm:w-56">
+
+            {/* Register Selector */}
+            <div className="relative w-full sm:w-48">
               <select
                 value={selectedRegister}
-                onChange={(e) => onRegisterChange(e.target.value)}
+                onChange={(e) => setSelectedRegister(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 appearance-none cursor-pointer focus:border-slate-500 focus:ring-1 focus:ring-slate-500 focus:outline-none"
               >
                 {Object.values(registerTypes).map((type) => (
@@ -74,10 +82,12 @@ const Header = ({ selectedRegister, selectedPart, onRegisterChange, onPartChange
             {/* Create Button */}
             <button
               onClick={onCreateClick}
-              className="w-full sm:w-auto px-5 py-2.5 bg-slate-700 text-white font-medium cursor-pointer rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 flex items-center justify-center space-x-2"
+              className="w-full sm:w-auto px-5 py-2.5 bg-slate-700 text-white font-medium cursor-pointer rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200 flex items-center justify-center gap-2"
             >
-              <span>+</span>
-              <span>{getCreateButtonText()}</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              {getCreateButtonText()}
             </button>
           </div>
         </div>

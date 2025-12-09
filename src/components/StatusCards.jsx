@@ -1,10 +1,13 @@
 // src/components/StatusCards.js
 import React from 'react';
+import { useRegister } from '../context/RegisterContext';
 import { statusTypes, registerTypes } from '../data/registerData';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck,faHourglassHalf, faDatabase } from '@fortawesome/free-solid-svg-icons';
 
-const StatusCards = ({ records, selectedRegister, selectedPart }) => {
+const StatusCards = () => {
+  const { currentRecords: records, selectedRegister, selectedPart } = useRegister();
+  
   const calculateStats = () => {
     // If it's Dispatch Register → return zeros for status-based stats
     if (selectedRegister === registerTypes.ISSUED) {
