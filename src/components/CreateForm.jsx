@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { registerFields, registerTypes } from '../data/registerData';
 
-const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isOpen, onClose, onSubmit }) => {
+const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isOpen, onClose, onSubmit, initialData = null, mode = "create" }) => {
 
   // --- LOGIC SECTION ---
   const initializeFormData = () => {
@@ -14,15 +14,15 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     return initialData;
   };
 
-  const [formData, setFormData] = useState(initializeFormData());
+  const emptyForm = { /* your default empty fields */ };
+  const [formData, setFormData] = useState(initialData || emptyForm);
+
   const inputRefs = useRef({});
   const [toast, setToast] = useState({ isVisible: false, message: '', isSuccess: true });
 
   useEffect(() => {
-    if (isOpen) {
-      setFormData(initializeFormData());
-    }
-  }, [selectedRegister, isOpen]);
+    setFormData(initialData || emptyForm);
+  }, [initialData, selectedRegister, selectedPart]);
 
   useEffect(() => {
     if (toast.isVisible) {
@@ -45,16 +45,21 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const recordWithDefaults = {
-      id: nextConsecutiveNumber.toString(),
-      ...(selectedRegister === registerTypes.RECEIVE ? { status: 'Pending' } : {}),
-      ...formData
-    };
-    onSubmit(recordWithDefaults);
-    setFormData(initializeFormData());
-    onClose();
-    showToast(`${selectedRegister.replace(' Register', '')} Record #${nextConsecutiveNumber} created successfully!`);
+
+    if (mode === "edit") {
+      // 🔁 EDIT MODE: just send changed fields
+      onSubmit(formData);
+      onClose();
+      showToast(`Record #${nextConsecutiveNumber} updated successfully!`);
+    } else {
+      // ➕ CREATE MODE: let context assign id & status
+      onSubmit(formData);
+      setFormData(initializeFormData());
+      onClose();
+      showToast(`${selectedRegister.replace(' Register', '')} Record created successfully!`);
+    }
   };
+
 
   const handleClose = () => {
     setFormData(initializeFormData());
@@ -83,7 +88,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
 
     // 2. CONDITIONAL CHECK: Only assign presets if the register is DISPATCH (ISSUED)
     const isDispatchRegister = selectedRegister === registerTypes.ISSUED;
-    
+
     // Only look up presets if it's the Dispatch Register
     const presets = isDispatchRegister ? fieldPresets[field.name] : null;
 
@@ -100,8 +105,8 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
                 handleInputChange(field.name, text);
                 // Logic to auto-focus the input after clicking
                 setTimeout(() => {
-                  const el = document.querySelector(`[name="${field.name}"]`) || 
-                             document.querySelector(`textarea[name="${field.name}"]`);
+                  const el = document.querySelector(`[name="${field.name}"]`) ||
+                    document.querySelector(`textarea[name="${field.name}"]`);
                   if (el) el.focus();
                 }, 50);
               }}
@@ -125,7 +130,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
         return (
           <div className="space-y-1">
             {/* Render presets above textarea */}
-            {renderPresetButtons()} 
+            {renderPresetButtons()}
             <textarea
               name={field.name}
               value={value}
@@ -138,7 +143,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
         );
 
       // ... (case 'select' and case 'date' remain the same)
-      
+
       case 'select':
         return (
           <div className="relative">
@@ -199,7 +204,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
           <div className="space-y-1">
             {/* Render presets above input */}
             {renderPresetButtons()}
-            
+
             <input
               name={field.name}
               type="text"

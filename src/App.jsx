@@ -8,18 +8,22 @@ import StatusCards from './components/StatusCards';
 import RecordTable from './components/RecordTable';
 import CreateForm from './components/CreateForm';
 import PrintView from './components/PrintView';
-import PrintRangeModal from './components/PrintRangeModal'; 
+import PrintRangeModal from './components/PrintRangeModal';
 
 function App() {
-  const { 
-    selectedRegister, 
-    selectedPart, 
+  const {
+    selectedRegister,
+    selectedPart,
     currentRecords,
     addNewRecord,
+    updateRecord,
     getNextConsecutiveNumber
   } = useRegister();
 
+
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState(null);
+
   const [isPrintRangeModalOpen, setIsPrintRangeModalOpen] = useState(false);
   const [recordsToPrint, setRecordsToPrint] = useState([]);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -38,8 +42,30 @@ function App() {
   };
 
   const handleFormSubmit = (formData) => {
-    addNewRecord(formData);
+    if (editingRecord) {
+      // EDIT MODE
+      updateRecord(
+        selectedRegister,
+        selectedPart,
+        editingRecord.id,   // ✅ use id, not consecutiveNo
+        formData
+      );
+    } else {
+      // CREATE MODE
+      addNewRecord(formData);
+    }
+
     setIsFormOpen(false);
+    setEditingRecord(null);
+  };
+
+  const handleCreateClick = () => {
+    setEditingRecord(null);     // we are creating, not editing
+    setIsFormOpen(true);
+  };
+  const handleEditRecord = (record) => {
+    setEditingRecord(record);   // store row data
+    setIsFormOpen(true);        // open the form
   };
 
   if (isPrinting) {
@@ -55,26 +81,30 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        onCreateClick={() => setIsFormOpen(true)}
+      <Header
+        onCreateClick={handleCreateClick}
       />
 
       <main className="max-w-7xl mx-auto">
-        <StatusCards /> 
-        
-        <RecordTable 
+        <StatusCards />
+
+        <RecordTable
           onPrint={handlePrintClick}
+          onEdit={handleEditRecord}
         />
       </main>
 
       <CreateForm
         selectedRegister={selectedRegister}
         selectedPart={selectedPart}
-        nextConsecutiveNumber={getNextConsecutiveNumber()}
+        nextConsecutiveNumber={editingRecord ? editingRecord.id : getNextConsecutiveNumber()}
         isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
+        onClose={() => { setIsFormOpen(false); setEditingRecord(null) }}
         onSubmit={handleFormSubmit}
+        initialData={editingRecord}
+        mode={editingRecord ? "edit" : "create"}
       />
+
 
       <PrintRangeModal
         isOpen={isPrintRangeModalOpen}

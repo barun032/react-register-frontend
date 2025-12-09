@@ -14,10 +14,10 @@ const columnConfig = {
   'Short subject': 'min-w-[350px] max-w-[500px]', // Wide column for subject
   'Remarks': 'min-w-[200px]',
   'From whom received': 'min-w-[200px]',
-  'To whom addressed': 'min-w-[200px]', 
+  'To whom addressed': 'min-w-[200px]',
   'Name of the Officer.': 'min-w-[150px]',
   'Date of receipt in office': 'min-w-[120px]',
-  'Reference Date':'min-w-[120px]',
+  'Reference Date': 'min-w-[120px]',
 };
 
 const getStatusFromRecord = (record) => {
@@ -40,9 +40,9 @@ const getStatusFromRecord = (record) => {
   }
 };
 
-const RecordTable = ({ onPrint }) => {
+const RecordTable = ({ onPrint, onEdit }) => {
   const { currentRecords: records, selectedRegister } = useRegister();
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -189,7 +189,7 @@ const RecordTable = ({ onPrint }) => {
                     const isConsecutiveHeader = header.name === 'Consecutive No.';
                     // 2. GET CUSTOM WIDTH CLASS
                     const widthClass = columnConfig[header.name] || columnConfig.default;
-                    
+
                     return (
                       <th
                         key={headerIndex}
@@ -223,6 +223,10 @@ const RecordTable = ({ onPrint }) => {
                       Status
                     </th>
                   )}
+
+                  <th rowSpan={2} className="px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200">
+                    Actions
+                  </th>
                 </tr>
               ))}
               {tableHeaders.length === 1 && selectedRegister === registerTypes.RECEIVE && (
@@ -230,6 +234,7 @@ const RecordTable = ({ onPrint }) => {
                   Status
                 </th>
               )}
+
             </thead>
 
             <tbody className="bg-white divide-y divide-gray-200">
@@ -294,11 +299,19 @@ const RecordTable = ({ onPrint }) => {
 
                       return (
                         // Optional: You can also add max-w classes here if you want to truncate text
-                        <td key={colIndex} className="px-4 py-3 whitespace-normal text-sm text-gray-700 border border-gray-200">
+                        <td key={colIndex} className="px-4 py-3 whitespace-normal text-sm text-gray-700 border border-gray-200 center">
                           {value || '-'}
                         </td>
                       );
                     })}
+                    <td className="px-2 py-1 border text-center">
+                      <button
+                        onClick={() => onEdit && onEdit(record)}
+                        className="px-2 py-1 text-xs border rounded hover:bg-slate-100"
+                      >
+                        Edit
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
