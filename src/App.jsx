@@ -9,6 +9,7 @@ import RecordTable from './components/RecordTable';
 import CreateForm from './components/CreateForm';
 import PrintView from './components/PrintView';
 import PrintRangeModal from './components/PrintRangeModal';
+import Footer from './components/Footer';
 
 function App() {
   const {
@@ -93,6 +94,8 @@ function App() {
           onEdit={handleEditRecord}
         />
       </main>
+
+      <Footer />
 
       <CreateForm
         selectedRegister={selectedRegister}
