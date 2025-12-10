@@ -180,7 +180,7 @@ const RecordTable = ({ onPrint, onEdit }) => {
           selectedRegister={selectedRegister}
         />
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto relative">
           <table className="min-w-full border-collapse">
             <thead className="bg-gray-50">
               {tableHeaders.map((row, rowIndex) => (
@@ -269,7 +269,7 @@ const RecordTable = ({ onPrint, onEdit }) => {
                 </tr>
               ) : (
                 paginatedRecords.map((record) => (
-                  <tr key={record.id} className="hover:bg-gray-50 transition-colors duration-150">
+                  <tr key={record.id} className="odd:bg-slate-50 transition-colors duration-150">
                     {allColumns.map((columnName, colIndex) => {
                       const isStatusColumn = columnName === 'Status';
                       const isIdColumn = columnName === 'Consecutive No.';
