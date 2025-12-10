@@ -114,9 +114,6 @@ export const RegisterProvider = ({ children }) => {
         });
     };
 
-
-
-
     const value = {
         selectedRegister,
         selectedPart,

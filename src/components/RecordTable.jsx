@@ -187,7 +187,6 @@ const RecordTable = ({ onPrint, onEdit }) => {
                 <tr key={rowIndex}>
                   {row.map((header, headerIndex) => {
                     const isConsecutiveHeader = header.name === 'Consecutive No.';
-                    // 2. GET CUSTOM WIDTH CLASS
                     const widthClass = columnConfig[header.name] || columnConfig.default;
 
                     return (
@@ -196,20 +195,37 @@ const RecordTable = ({ onPrint, onEdit }) => {
                         rowSpan={header.rowspan || 1}
                         colSpan={header.colspan || 1}
                         onClick={isConsecutiveHeader ? toggleSort : undefined}
-                        // 3. APPLY WIDTH CLASS BELOW
                         className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 
-                          ${widthClass} ${header.className || ''} 
-                          ${isConsecutiveHeader ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}`}
+              ${widthClass} ${header.className || ''} 
+              ${isConsecutiveHeader ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}`}
                       >
                         <div className="flex items-center justify-center gap-1">
                           {header.name}
                           {isConsecutiveHeader && (
                             <div className="flex flex-col -space-y-1">
-                              <svg className={`w-3.5 h-3.5 transition-all ${sortOrder === 'asc' ? 'text-slate-800' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                              <svg
+                                className={`w-3.5 h-3.5 transition-all ${sortOrder === 'asc' ? 'text-slate-800' : 'text-gray-400'
+                                  }`}
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z"
+                                  clipRule="evenodd"
+                                />
                               </svg>
-                              <svg className={`w-3.5 h-3.5 transition-all ${sortOrder === 'desc' ? 'text-slate-800' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              <svg
+                                className={`w-3.5 h-3.5 transition-all ${sortOrder === 'desc' ? 'text-slate-800' : 'text-gray-400'
+                                  }`}
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
                               </svg>
                             </div>
                           )}
@@ -217,25 +233,30 @@ const RecordTable = ({ onPrint, onEdit }) => {
                       </th>
                     );
                   })}
-                  {/* 4. APPLY WIDTH TO STATUS COLUMN AS WELL */}
+
+                  {/* Status column – only in first header row */}
                   {rowIndex === 0 && selectedRegister === registerTypes.RECEIVE && (
-                    <th rowSpan={2} className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 ${columnConfig['Status']}`}>
+                    <th
+                      rowSpan={tableHeaders.length}
+                      className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 ${columnConfig['Status']}`}
+                    >
                       Status
                     </th>
                   )}
 
-                  <th rowSpan={2} className="px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200">
-                    Actions
-                  </th>
+                  {/* Actions column – only in first header row */}
+                  {rowIndex === 0 && (
+                    <th
+                      rowSpan={tableHeaders.length}
+                      className="px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200"
+                    >
+                      Actions
+                    </th>
+                  )}
                 </tr>
               ))}
-              {tableHeaders.length === 1 && selectedRegister === registerTypes.RECEIVE && (
-                <th className={`px-4 py-3 text-center text-xs font-medium text-gray-500 tracking-wider border border-gray-200 ${columnConfig['Status']}`}>
-                  Status
-                </th>
-              )}
-
             </thead>
+
 
             <tbody className="bg-white divide-y divide-gray-200">
               {paginatedRecords.length === 0 ? (
@@ -282,16 +303,16 @@ const RecordTable = ({ onPrint, onEdit }) => {
                       }
 
                       if (columnName === 'Rs.' || columnName === 'P.') {
-                        return <td key={colIndex} className="px-4 py-3 text-center border border-gray-200">{value || '0'}</td>;
+                        return <td key={colIndex} className="px-4 py-3 text-center border border-gray-200">{value ?? ''}</td>;
                       }
                       if (columnName === 'Part No.') {
-                        return <td key={colIndex} className="px-4 py-3 text-center border border-gray-200 text-xs font-medium text-gray-600">{value || '—'}</td>;
+                        return <td key={colIndex} className="px-4 py-3 text-center border border-gray-200 text-xs font-medium text-gray-600">{value ?? ''}</td>;
                       }
                       if (columnName === 'Ref No.') {
                         return (
                           <td key={colIndex} className="px-4 py-3 text-center border border-gray-200 font-medium">
                             <span className="inline-block px-3 py-1 text-xs font-mono font-bold text-slate-800 bg-slate-100 rounded border border-slate-300">
-                              {value || '—'}
+                              {value ?? ''}
                             </span>
                           </td>
                         );
@@ -300,16 +321,16 @@ const RecordTable = ({ onPrint, onEdit }) => {
                       return (
                         // Optional: You can also add max-w classes here if you want to truncate text
                         <td key={colIndex} className="px-4 py-3 whitespace-normal text-sm text-gray-700 border border-gray-200 center">
-                          {value || '-'}
+                          {value ?? ''}
                         </td>
                       );
                     })}
-                    <td className="px-2 py-1 border text-center">
+                    <td className="px-2 py-1 text-center">
                       <button
                         onClick={() => onEdit && onEdit(record)}
-                        className="px-2 py-1 text-xs border rounded hover:bg-slate-100"
+                        className="text-center cursor-pointer text-xs font-medium text-gray-500 tracking-wider"
                       >
-                        Edit
+                        <i className="fa-solid fa-pen-to-square text-red-400 hover:text-red-500 transition text-[17px]"></i>
                       </button>
                     </td>
                   </tr>
