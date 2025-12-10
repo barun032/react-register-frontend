@@ -2,6 +2,7 @@
 import React from 'react';
 import { registerTypes, receivePartTypes } from '../data/registerData';
 import { useRegister } from '../context/RegisterContext';
+import logo from '../../public/logo.png'
 
 const Header = ({ onCreateClick }) => {
   const { 
@@ -27,8 +28,8 @@ const Header = ({ onCreateClick }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row justify-between items-center py-4">
           <div className="flex items-center mb-4 sm:mb-0">
-            <div className="flex items-center justify-center w-10 h-10 bg-slate-700 rounded-lg">
-              <span className="text-white font-bold text-lg">📋</span>
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg">
+             <img src={logo} alt="logo" />
             </div>
             <div className="ml-3">
               <h1 className="text-xl font-semibold text-gray-900">Register Management</h1>
