@@ -3,15 +3,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { registerTypes, receivePartTypes } from '../data/registerData';
 import { useRegister } from '../context/RegisterContext';
 import logo from '../../public/logo.png'
+import { useNavigate } from 'react-router-dom';
 
-const Header = ({ onCreateClick, onDashboardClick }) => {
+const Header = ({ onCreateClick }) => {
+
+  const navigate = useNavigate();
+
   const { 
     selectedRegister, 
     setSelectedRegister, 
     selectedPart, 
     setSelectedPart 
   } = useRegister();
-
+  
   // 1. State for the dropdown menu
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -29,7 +33,7 @@ const Header = ({ onCreateClick, onDashboardClick }) => {
 
   const handleDashboardSelect = () => {
     setIsUserMenuOpen(false); // Close menu
-    onDashboardClick();       // Trigger actual dashboard
+    navigate('/admin-dashboard');
   };
 
   const handleLogout = () => {

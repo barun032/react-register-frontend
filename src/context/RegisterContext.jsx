@@ -6,6 +6,7 @@ import { registerTypes, receivePartTypes, statusTypes } from '../data/registerDa
 const RegisterContext = createContext();
 
 export const RegisterProvider = ({ children }) => {
+    // 1. Existing Register State
     const [allRecords, setAllRecords] = useLocalStorage('onlineRegister', {
         [registerTypes.RECEIVE]: {
             [receivePartTypes.PART_I]: [],
@@ -16,9 +17,15 @@ export const RegisterProvider = ({ children }) => {
         [registerTypes.ISSUED]: []
     });
 
+    // 2. NEW: User State (Default to one admin user if empty)
+    const [users, setUsers] = useLocalStorage('appUsers', [
+        { id: 1, name: 'Admin User', email: 'admin@example.com', role: 'admin', joined: new Date().toISOString().split('T')[0] }
+    ]);
+
     const [selectedRegister, setSelectedRegister] = useState(registerTypes.RECEIVE);
     const [selectedPart, setSelectedPart] = useState(receivePartTypes.PART_I);
 
+    // ... existing register logic (handleRegisterChange, currentRecords, getNextConsecutiveNumber) ...
     const handleRegisterChange = (register) => {
         setSelectedRegister(register);
         if (register === registerTypes.RECEIVE) {
@@ -39,7 +46,7 @@ export const RegisterProvider = ({ children }) => {
         return maxId + 1;
     };
 
-    // add records
+    // ... existing record functions (addNewRecord, updateRecord, restoreData logic if you kept it) ...
     const addNewRecord = (formData) => {
         const newRecordId = getNextConsecutiveNumber();
         const newRecord = {
@@ -60,7 +67,7 @@ export const RegisterProvider = ({ children }) => {
                 const currentIssuedList = updated[registerTypes.ISSUED] || [];
                 updated[registerTypes.ISSUED] = [...currentIssuedList, newRecord];
 
-                // Update linked Receive Record
+                // Update linked Receive Record logic...
                 const refPart = formData.receiveRefPart;
                 const refNo = String(formData.receiveRefNo || '').trim();
 
@@ -83,44 +90,53 @@ export const RegisterProvider = ({ children }) => {
         });
     };
 
-    // UPDATE an existing record
     const updateRecord = (registerType, part, id, updatedFields) => {
-        setAllRecords(prev => {
+         setAllRecords(prev => {
             const copy = { ...prev };
-
             if (registerType === registerTypes.RECEIVE) {
                 const list = [...copy[registerTypes.RECEIVE][part]];
-                const index = list.findIndex(
-                    r => String(r.id) === String(id)
-                );
-                if (index === -1) return prev; // not found
-
+                const index = list.findIndex(r => String(r.id) === String(id));
+                if (index === -1) return prev;
                 list[index] = { ...list[index], ...updatedFields };
                 copy[registerTypes.RECEIVE][part] = list;
             }
-
             if (registerType === registerTypes.ISSUED) {
                 const list = [...copy[registerTypes.ISSUED]];
-                const index = list.findIndex(
-                    r => String(r.id) === String(id)
-                );
+                const index = list.findIndex(r => String(r.id) === String(id));
                 if (index === -1) return prev;
-
                 list[index] = { ...list[index], ...updatedFields };
                 copy[registerTypes.ISSUED] = list;
             }
-
             return copy;
         });
     };
 
-    const restoreData = (newData) => {
-        setAllRecords(newData);
+
+    // 3. NEW: User Management Functions
+    const addUser = (userData) => {
+        const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+        const newUser = { 
+            id: newId, 
+            joined: new Date().toISOString().split('T')[0],
+            ...userData 
+        };
+        setUsers([...users, newUser]);
+    };
+
+    const updateUser = (id, updatedData) => {
+        setUsers(users.map(user => user.id === id ? { ...user, ...updatedData } : user));
+    };
+
+    const deleteUser = (id) => {
+        setUsers(users.filter(user => user.id !== id));
     };
 
     const value = {
         allRecords,
-        restoreData, 
+        users,        // <-- Exposed
+        addUser,      // <-- Exposed
+        updateUser,   // <-- Exposed
+        deleteUser,   // <-- Exposed
         selectedRegister,
         selectedPart,
         currentRecords,
