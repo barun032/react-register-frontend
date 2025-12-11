@@ -10,6 +10,7 @@ import CreateForm from './components/CreateForm';
 import PrintView from './components/PrintView';
 import PrintRangeModal from './components/PrintRangeModal';
 import Footer from './components/Footer';
+import AdminDashboard from './components/AdminDashboard';
 
 function App() {
   const {
@@ -24,6 +25,7 @@ function App() {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
+  const [viewMode, setViewMode] = useState('register');
 
   const [isPrintRangeModalOpen, setIsPrintRangeModalOpen] = useState(false);
   const [recordsToPrint, setRecordsToPrint] = useState([]);
@@ -80,10 +82,19 @@ function App() {
     );
   }
 
+  if (viewMode === 'dashboard') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <AdminDashboard onClose={() => setViewMode('register')} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header
         onCreateClick={handleCreateClick}
+        onDashboardClick={() => setViewMode('dashboard')}
       />
 
       <main className="max-w-7xl mx-auto">

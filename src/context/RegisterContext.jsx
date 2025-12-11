@@ -114,7 +114,13 @@ export const RegisterProvider = ({ children }) => {
         });
     };
 
+    const restoreData = (newData) => {
+        setAllRecords(newData);
+    };
+
     const value = {
+        allRecords,
+        restoreData, 
         selectedRegister,
         selectedPart,
         currentRecords,
