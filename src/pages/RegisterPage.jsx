@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { registerTypes } from '../data/registerData';
 import { useRegister } from '../context/RegisterContext';
-import Header from './Header'; // Adjust path if needed
-import StatusCards from './StatusCards';
-import RecordTable from './RecordTable';
-import CreateForm from './CreateForm';
-import PrintView from './PrintView';
-import PrintRangeModal from './PrintRangeModal';
-import Footer from './Footer';
+import Header from '../components/Header'; // Adjust path if needed
+import StatusCards from '../components/StatusCards';
+import RecordTable from '../components/RecordTable';
+import CreateForm from '../components/CreateForm';
+import PrintView from '../components/PrintView';
+import PrintRangeModal from '../components/PrintRangeModal';
+import Footer from '../components/Footer';
 
 // This component now holds the logic that used to be in App.jsx
 const RegisterPage = () => {
@@ -17,7 +17,9 @@ const RegisterPage = () => {
     currentRecords,
     addNewRecord,
     updateRecord,
-    getNextConsecutiveNumber
+    getNextConsecutiveNumber,
+    logout,
+    currentUser
   } = useRegister();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -57,6 +59,12 @@ const RegisterPage = () => {
   const handleEditRecord = (record) => {
     setEditingRecord(record);
     setIsFormOpen(true);
+  };
+
+  const handleLogout = () => {
+    setIsUserMenuOpen(false);
+    logout(); 
+    navigate('/');
   };
 
   if (isPrinting) {

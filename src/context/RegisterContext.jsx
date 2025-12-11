@@ -6,7 +6,44 @@ import { registerTypes, receivePartTypes, statusTypes } from '../data/registerDa
 const RegisterContext = createContext();
 
 export const RegisterProvider = ({ children }) => {
-    // 1. Existing Register State
+
+    // 1. User State (Default Admin User)
+    const [users, setUsers] = useLocalStorage('appUsers', [
+        { 
+            id: 1, 
+            name: 'Admin User', 
+            email: 'admin@gmail.com', 
+            password: 'admin', 
+            role: 'admin', 
+            joined: new Date().toISOString().split('T')[0] 
+        }
+    ]);
+
+    // 2. Current User Session
+    const [currentUser, setCurrentUser] = useState(() => {
+        const saved = sessionStorage.getItem('currentUser');
+        return saved ? JSON.parse(saved) : null;
+    });
+
+    // 3. Login Function
+    const login = (email, password) => {
+        const user = users.find(u => u.email === email && u.password === password);
+        if (user) {
+            setCurrentUser(user);
+            sessionStorage.setItem('currentUser', JSON.stringify(user));
+            return { success: true, role: user.role };
+        } else {
+            return { success: false, message: 'Invalid email or password' };
+        }
+    };
+
+    // 4. Logout Function
+    const logout = () => {
+        setCurrentUser(null);
+        sessionStorage.removeItem('currentUser');
+    };
+
+    
     const [allRecords, setAllRecords] = useLocalStorage('onlineRegister', {
         [registerTypes.RECEIVE]: {
             [receivePartTypes.PART_I]: [],
@@ -17,15 +54,9 @@ export const RegisterProvider = ({ children }) => {
         [registerTypes.ISSUED]: []
     });
 
-    // 2. NEW: User State (Default to one admin user if empty)
-    const [users, setUsers] = useLocalStorage('appUsers', [
-        { id: 1, name: 'Admin User', email: 'admin@example.com', role: 'admin', joined: new Date().toISOString().split('T')[0] }
-    ]);
-
     const [selectedRegister, setSelectedRegister] = useState(registerTypes.RECEIVE);
     const [selectedPart, setSelectedPart] = useState(receivePartTypes.PART_I);
 
-    // ... existing register logic (handleRegisterChange, currentRecords, getNextConsecutiveNumber) ...
     const handleRegisterChange = (register) => {
         setSelectedRegister(register);
         if (register === registerTypes.RECEIVE) {
@@ -46,7 +77,6 @@ export const RegisterProvider = ({ children }) => {
         return maxId + 1;
     };
 
-    // ... existing record functions (addNewRecord, updateRecord, restoreData logic if you kept it) ...
     const addNewRecord = (formData) => {
         const newRecordId = getNextConsecutiveNumber();
         const newRecord = {
@@ -67,7 +97,7 @@ export const RegisterProvider = ({ children }) => {
                 const currentIssuedList = updated[registerTypes.ISSUED] || [];
                 updated[registerTypes.ISSUED] = [...currentIssuedList, newRecord];
 
-                // Update linked Receive Record logic...
+                // Update linked Receive Record logic
                 const refPart = formData.receiveRefPart;
                 const refNo = String(formData.receiveRefNo || '').trim();
 
@@ -111,8 +141,6 @@ export const RegisterProvider = ({ children }) => {
         });
     };
 
-
-    // 3. NEW: User Management Functions
     const addUser = (userData) => {
         const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
         const newUser = { 
@@ -133,10 +161,10 @@ export const RegisterProvider = ({ children }) => {
 
     const value = {
         allRecords,
-        users,        // <-- Exposed
-        addUser,      // <-- Exposed
-        updateUser,   // <-- Exposed
-        deleteUser,   // <-- Exposed
+        users,        
+        addUser,      
+        updateUser,   
+        deleteUser,   
         selectedRegister,
         selectedPart,
         currentRecords,
@@ -144,7 +172,10 @@ export const RegisterProvider = ({ children }) => {
         setSelectedPart,
         addNewRecord,
         updateRecord,
-        getNextConsecutiveNumber
+        getNextConsecutiveNumber,
+        currentUser,  
+        login,        
+        logout,
     };
 
     return <RegisterContext.Provider value={value}>{children}</RegisterContext.Provider>;
