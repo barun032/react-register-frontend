@@ -1,10 +1,11 @@
-// src/App.jsx
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/AdminDashboard';
 import LoginPage from './pages/LoginPage';
 import { useRegister } from './context/RegisterContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ProtectedRoute = ({ children, requireAdmin }) => {
   const { currentUser } = useRegister();
@@ -25,33 +26,48 @@ const ProtectedRoute = ({ children, requireAdmin }) => {
 
 function App() {
   return (
-    <Routes>
-      {/* 1. Public Route: Login Page */}
-      <Route path="/login" element={<LoginPage />} />
-      
-      {/* 2. Protected Route: Home Page (Register Page) */}
-      <Route 
-        path="/" 
-        element={
-          <ProtectedRoute>
-            <RegisterPage />
-          </ProtectedRoute>
-        } 
+    <>
+      {/* Notificaion alert  */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
       />
-      
-      {/* 3. Protected Route: Admin Dashboard */}
-      <Route 
-        path="/admin-dashboard" 
-        element={
-          <ProtectedRoute requireAdmin={true}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      
-      {/* Catch-all: Redirect unknown paths to Home */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      <Routes>
+        {/* 1. Public Route: Login Page */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* 2. Protected Route: Home Page (Register Page) */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <RegisterPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 3. Protected Route: Admin Dashboard */}
+        <Route
+          path="/admin-dashboard"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all: Redirect unknown paths to Home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 

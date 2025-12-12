@@ -1,6 +1,7 @@
 // src/components/CreateForm.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { registerFields, registerTypes } from '../data/registerData';
+import { toast } from 'react-toastify';
 
 const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isOpen, onClose, onSubmit, initialData = null, mode = "create" }) => {
 
@@ -15,10 +16,10 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
   };
 
   const emptyForm = { /* your default empty fields */ };
+
   const [formData, setFormData] = useState(initialData || emptyForm);
 
   const inputRefs = useRef({});
-  const [toast, setToast] = useState({ isVisible: false, message: '', isSuccess: true });
 
   useEffect(() => {
   if (isOpen) {
@@ -36,18 +37,6 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     setFormData(initialData || emptyForm);
   }, [initialData, selectedRegister, selectedPart]);
 
-  useEffect(() => {
-    if (toast.isVisible) {
-      const timer = setTimeout(() => {
-        setToast(prev => ({ ...prev, isVisible: false }));
-      }, 2500);
-      return () => clearTimeout(timer);
-    }
-  }, [toast.isVisible]);
-
-  const showToast = (message, isSuccess = true) => {
-    setToast({ isVisible: true, message, isSuccess });
-  };
 
   const fields = registerFields[selectedRegister] || [];
 
@@ -62,13 +51,13 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
       // 🔁 EDIT MODE: just send changed fields
       onSubmit(formData);
       onClose();
-      showToast(`Record #${nextConsecutiveNumber} updated successfully!`);
+      toast.info(`Record #${nextConsecutiveNumber} updated successfully!`);
     } else {
       // ➕ CREATE MODE: let context assign id & status
       onSubmit(formData);
       setFormData(initializeFormData());
       onClose();
-      showToast(`${selectedRegister.replace(' Register', '')} Record created successfully!`);
+      toast.success(`${selectedRegister.replace(' Register', '')} Record created successfully!`);
     }
   };
 
@@ -352,23 +341,10 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     </>
   );
 
-  const ToastNotification = () => {
-    const baseClasses = "fixed top-5 right-5 max-w-sm w-full shadow-lg rounded-xl pointer-events-auto ring-1 ring-black ring-opacity-5 transition-all duration-500 ease-in-out z-[100] p-4 flex items-center";
-    const activeClasses = `opacity-100 translate-x-0 bg-emerald-500 ring-emerald-600 text-white`;
-    const inactiveClasses = `opacity-0 translate-x-full bg-emerald-500 ring-emerald-600`;
-
-    return (
-      <div className={`${baseClasses} ${toast.isVisible ? activeClasses : inactiveClasses}`}>
-        <span className="text-xl mr-3">✅</span>
-        <p className="text-sm font-medium">{toast.message}</p>
-      </div>
-    );
-  };
 
   return (
     <>
       {isOpen && modalContentJSX}
-      <ToastNotification />
     </>
   );
 };
