@@ -65,7 +65,7 @@ const TableToolbar = ({ searchQuery, setSearchQuery, dateFrom, setDateFrom, date
           </div>
 
           {/* Print Button */}
-          <button onClick={onPrint} className="px-4 py-1.5 h-9 bg-gray-800 text-white text-sm font-bold rounded shadow-sm hover:bg-gray-900 transition-colors flex items-center gap-2 border border-gray-900 cursor-pointer">
+          <button onClick={onPrint} className="px-4 py-1.5 h-9 bg-blue-800 text-white text-sm font-bold rounded shadow-sm hover:bg-blue-900 transition-colors flex items-center gap-2 border border-blue-900 cursor-pointer">
             <i className="fa-solid fa-print"></i>
             <span>Print / Export</span>
           </button>
