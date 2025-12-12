@@ -10,13 +10,30 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     fields.forEach(field => { initData[field.name] = ''; });
     return initData;
   };
+
+
   const [formData, setFormData] = useState(initialData || initializeFormData());
   const inputRefs = useRef({});
+
+  // --- 1. RESTORED PRESETS DATA ---
+  const fieldPresets = {
+    to: [
+      "To\nThe Director of Information\nDepartment of Information & Cultural Affairs\nGovt. of West Bengal\nNabanna, 9th Floor\n325, Sarat Chatterjee Road,\nMandirtala, Shibpur\nHowrah-711102",
+      "To\nThe Deputy Director General (Engg.)\nAkashvani Kolkata\nAkashvani Bhavan\nGostho Paul Sarani, near Eden Gardens,\nKolkata-700001",
+      "To\nThe Deputy Director General (Engg.)\nDoordarshan Kendra, Kolkata\nDoordarshan Bhavan,\n18/3, Uday Sankar Sarani,\nGolf Green,\nKolkata-700095",
+    ],
+    subject: [
+      "Forwarding Letter/Challan for Memo No(s) ... /MPB to ... /MPB for wide publication of the information of missing/recovered person(s) / un-identified dead body(s) through News Papers/Doordarshan Kendra Kolkata/Akashvani Kolkata",
+      "Information of missing/recovered person/un-idenfied dead body... for wide publication through News Papers/Doordarshan Kendra Kolkata/Akashvani Kolkata",
+      "Ditto for missing/recovered person/un-identified dead body..."
+    ]
+  };
 
   useEffect(() => { if (isOpen) document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = 'auto'; }; }, [isOpen]);
   useEffect(() => { setFormData(initialData || initializeFormData()); }, [initialData, selectedRegister]);
 
   const handleInputChange = (fieldName, value) => { setFormData(prev => ({ ...prev, [fieldName]: value })); };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
@@ -28,8 +45,54 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
   const renderField = (field) => {
     const value = formData[field.name] || '';
     const inputClass = "w-full px-3 py-2 border border-gray-300 rounded bg-white text-gray-900 text-sm focus:border-blue-700 focus:ring-1 focus:ring-blue-700 outline-none transition-all placeholder-gray-400";
-    
-    if (field.type === 'textarea') return <textarea name={field.name} value={value} onChange={(e) => handleInputChange(field.name, e.target.value)} rows={3} className={`${inputClass} resize-none`} placeholder={`Enter ${field.label}...`} />;
+
+    // --- 2. RESTORED PRESET BUTTON LOGIC (THEMED) ---
+    const isDispatchRegister = selectedRegister === registerTypes.ISSUED;
+    const presets = isDispatchRegister ? fieldPresets[field.name] : null;
+
+    const renderPresetButtons = () => {
+      if (!presets) return null;
+      return (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {presets.map((text, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                handleInputChange(field.name, text);
+              }}
+              className={`
+                px-3 py-1 text-[11px] font-bold uppercase rounded border transition-colors duration-200 text-left
+                ${value === text
+                  ? 'bg-blue-800 text-white border-blue-900' // Active State
+                  : 'bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100 hover:border-blue-300' // Inactive State
+                }
+              `}
+              title={text}
+            >
+              {text.length > 50 ? text.substring(0, 47) + '...' : text}
+            </button>
+          ))}
+        </div>
+      );
+    };
+
+    if (field.type === 'textarea') {
+      return (
+        <div>
+          {renderPresetButtons()}
+          <textarea
+            name={field.name}
+            value={value}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            rows={4}
+            className={`${inputClass} resize-none`}
+            placeholder={`Enter ${field.label}...`}
+          />
+        </div>
+      );
+    }
+
     if (field.type === 'select') return (
       <div className="relative">
         <select name={field.name} value={value} onChange={(e) => handleInputChange(field.name, e.target.value)} className={`${inputClass} appearance-none cursor-pointer`}>
@@ -39,15 +102,36 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">▼</div>
       </div>
     );
+
     if (field.type === 'date') return (
-        <div className='relative cursor-pointer' onClick={() => inputRefs.current[field.name]?.showPicker()}>
-            <input ref={el => inputRefs.current[field.name] = el} name={field.name} type="date" value={value} onChange={(e) => handleInputChange(field.name, e.target.value)} className={`${inputClass} cursor-pointer`} />
-        </div>
+      <div className='relative cursor-pointer' onClick={() => inputRefs.current[field.name]?.showPicker()}>
+        <input ref={el => inputRefs.current[field.name] = el} name={field.name} type="date" value={value} onChange={(e) => handleInputChange(field.name, e.target.value)} className={`${inputClass} cursor-pointer`} />
+      </div>
     );
-    return <input name={field.name} type={field.type === 'number' ? 'number' : 'text'} value={value} onChange={(e) => handleInputChange(field.name, e.target.value)} className={inputClass} placeholder={`Enter ${field.label}...`} />;
+
+    // Standard Text Input (with presets support for single line inputs if needed)
+    return (
+      <div>
+        {renderPresetButtons()}
+        <input
+          name={field.name}
+          type={field.type === 'number' ? 'number' : 'text'}
+          value={value}
+          onChange={(e) => handleInputChange(field.name, e.target.value)}
+          className={inputClass}
+          placeholder={`Enter ${field.label}...`}
+        />
+      </div>
+    );
   };
 
   const fields = registerFields[selectedRegister] || [];
+
+  // --- HELPER FOR MODAL TITLE ---
+  const getModalTitle = () => {
+    if (mode === 'edit') return 'Modify Record';
+    return selectedRegister === registerTypes.RECEIVE ? 'New Receive Entry' : 'New Dispatch Entry';
+  };
 
   return (
     isOpen && (
@@ -55,12 +139,12 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity" onClick={onClose} />
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
           <div className="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col rounded shadow-2xl overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-300 border border-gray-400">
-            
+
             {/* Modal Header */}
             <div className="bg-gray-100 px-8 py-4 border-b border-gray-300 shrink-0 flex justify-between items-center">
               <div>
                 <h2 className="text-xl font-bold text-blue-900 uppercase tracking-wide flex items-center gap-2">
-                  <i className="fa-solid fa-file-pen"></i> {mode === 'edit' ? 'Modify Record' : 'New Record Entry'}
+                  <i className="fa-solid fa-file-pen"></i> {getModalTitle()}
                 </h2>
                 <p className="text-gray-500 text-xs mt-0.5">Official Use Only</p>
               </div>
@@ -90,9 +174,9 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
                 </div>
 
                 <div className="flex gap-4 pt-6 mt-6 border-t border-gray-200">
-                  <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-gray-300 text-gray-700 bg-white rounded font-bold hover:bg-gray-100 transition shadow-sm text-sm uppercase">Cancel</button>
-                  <button type="submit" className="flex-1 py-2.5 bg-blue-800 text-white rounded font-bold hover:bg-blue-900 transition-all shadow border border-blue-900 flex items-center justify-center gap-2 text-sm uppercase">
-                    <i className="fa-solid fa-save"></i> Save Record
+                  <button type="button" onClick={onClose} className="cursor-pointer flex-1 py-2.5 border border-gray-300 text-gray-700 bg-white rounded font-bold hover:bg-gray-100 transition shadow-sm text-sm uppercase">Cancel</button>
+                  <button type="submit" className="cursor-pointer flex-1 py-2.5 bg-blue-800 text-white rounded font-bold hover:bg-blue-900 transition-all shadow border border-blue-900 flex items-center justify-center gap-2 text-sm uppercase">
+                    <i className="fa-solid fa-save"></i> {mode === 'edit' ? 'Update Record' : 'Save Record'}
                   </button>
                 </div>
               </form>

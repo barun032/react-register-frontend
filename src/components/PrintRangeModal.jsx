@@ -38,7 +38,7 @@ const PrintRangeModal = ({ isOpen, onClose, totalRecords, onConfirm }) => {
               </h3>
               <p className="text-blue-200 text-xs mt-0.5">Select Record Range</p>
             </div>
-            <button onClick={onClose} className="text-white/80 hover:text-white transition"><i className="fa-solid fa-xmark text-lg"></i></button>
+            <button onClick={onClose} className="text-white/80 hover:text-red-700 cursor-pointer transition"><i className="fa-solid fa-xmark text-lg"></i></button>
           </div>
 
           <div className="p-6 space-y-5 bg-gray-50">
@@ -67,8 +67,8 @@ const PrintRangeModal = ({ isOpen, onClose, totalRecords, onConfirm }) => {
             )}
 
             <div className="flex gap-3 pt-2">
-              <button onClick={onClose} className="flex-1 py-2 border border-gray-300 text-gray-700 bg-white rounded font-bold hover:bg-gray-100 transition text-sm uppercase">Cancel</button>
-              <button onClick={handleConfirm} className="flex-1 py-2 bg-blue-800 text-white rounded font-bold hover:bg-blue-900 transition shadow-sm border border-blue-900 flex items-center justify-center gap-2 text-sm uppercase">
+              <button onClick={onClose} className="flex-1 py-2 border border-gray-300 cursor-pointer text-gray-700 bg-white rounded font-bold hover:bg-gray-100 transition text-sm uppercase">Cancel</button>
+              <button onClick={handleConfirm} className="flex-1 py-2 bg-blue-800 text-white rounded cursor-pointer font-bold hover:bg-blue-900 transition shadow-sm border border-blue-900 flex items-center justify-center gap-2 text-sm uppercase">
                 <i className="fa-solid fa-print"></i> Print
               </button>
             </div>

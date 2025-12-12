@@ -36,8 +36,8 @@ const TableToolbar = ({ searchQuery, setSearchQuery, dateFrom, setDateFrom, date
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           {/* DATE RANGE */}
           <div onClick={handleContainerClick} className="relative flex items-center bg-white border border-gray-300 rounded hover:border-blue-500 transition-colors cursor-pointer min-w-64 h-9 shadow-sm group">
-            <div onClick={(e) => { e.stopPropagation(); openFrom(); }} className="absolute inset-0 left-0 right-1/2 z-10" title="Start Date"/>
-            <div onClick={(e) => { e.stopPropagation(); openTo(); }} className="absolute inset-0 left-1/2 right-0 z-10" title="End Date"/>
+            <div onClick={(e) => { e.stopPropagation(); openFrom(); }} className="absolute inset-0 left-0 right-1/2 z-10" title="Start Date" />
+            <div onClick={(e) => { e.stopPropagation(); openTo(); }} className="absolute inset-0 left-1/2 right-0 z-10" title="End Date" />
             <input ref={fromInputRef} type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="sr-only" />
             <input ref={toInputRef} type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="sr-only" />
 

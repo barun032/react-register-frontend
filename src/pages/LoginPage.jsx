@@ -16,17 +16,17 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center py-12 relative overflow-hidden">
+    <div className="min-h-screen bg-gray-100 flex flex-col item-center justify-center py-12 relative overflow-hidden">
       {/* Top Decoration Bar */}
       <div className="absolute top-0 w-full h-2 bg-gradient-to-r from-green-600 via-blue-700 to-green-600"></div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-24 h-24 mb-4">
+            <div className="w-17 h-17 mb-4">
                 <img src={logo} alt="Biswa Bangla Logo" className="w-full h-full object-contain drop-shadow-md" />
             </div>
             <h2 className="text-2xl font-bold text-blue-900 font-serif tracking-tight uppercase">
-              Department of Information
+              Department of WBCID
             </h2>
             <p className="text-sm font-bold text-green-700 mt-1 uppercase tracking-widest">Government of West Bengal</p>
             <div className="mt-6 border-b-2 border-yellow-500 w-16"></div>
@@ -68,7 +68,7 @@ const LoginPage = () => {
           </form>
           
           <div className="mt-6 text-center">
-              <p className="text-[10px] text-gray-400">Authorized Personnel Only • NIC WB</p>
+              <p className="text-[10px] text-gray-400">Authorized Personnel Only • MPB WB</p>
           </div>
         </div>
       </div>

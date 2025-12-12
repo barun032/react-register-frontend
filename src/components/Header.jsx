@@ -38,7 +38,7 @@ const Header = ({ onCreateClick }) => {
 
   const getCreateButtonText = () => {
     switch (selectedRegister) {
-      case registerTypes.RECEIVE: return 'New Receipt Entry';
+      case registerTypes.RECEIVE: return 'New Receive Entry';
       case registerTypes.ISSUED: return 'New Dispatch Entry';
       default: return 'Create Entry';
     }
@@ -49,8 +49,8 @@ const Header = ({ onCreateClick }) => {
   return (
     <header className="bg-white border-b-4 border-blue-900 sticky top-0 z-40 shadow-md">
       {/* Top Government Strip */}
-      <div className="bg-blue-900 text-white py-1 px-4 text-[11px] uppercase font-bold tracking-widest text-center sm:text-left shadow-sm">
-        Government of West Bengal • Register Management Portal
+      <div className="bg-blue-900 text-white py-2 px-4 text-[11px] uppercase font-bold tracking-widest text-center shadow-sm">
+        <span className='text-center'>Government of West Bengal • Register Management Portal</span>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -63,9 +63,9 @@ const Header = ({ onCreateClick }) => {
             </div>
             <div className="ml-3">
               <h1 className="text-xl font-bold text-gray-800 leading-tight font-serif tracking-tight">
-                Department of Information
+                Department of MPB
               </h1>
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-wide">Document Tracking System (DTS)</p>
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-wide">Register Management System</p>
             </div>
           </div>
           
@@ -99,7 +99,7 @@ const Header = ({ onCreateClick }) => {
                 title="User Profile"
               >
                  <div className="p-1 rounded-full border-2 border-gray-200 group-hover:border-blue-600 bg-gray-50 transition-colors">
-                    <i className="fa-solid fa-user text-lg px-1.5 py-0.5 text-gray-500 group-hover:text-blue-700"></i>
+                    <i className="fa-solid fa-user text-lg text-gray-500 group-hover:text-blue-700"></i>
                  </div>
                  <span className="text-[10px] font-bold mt-0.5 text-blue-900 uppercase tracking-tight">
                     {currentUser?.name?.split(' ')[0] || 'User'}
@@ -114,7 +114,7 @@ const Header = ({ onCreateClick }) => {
                    </div>
                   {currentUser?.role === 'admin' && (
                     <button onClick={handleDashboardSelect} className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-800 flex items-center gap-3 cursor-pointer border-b border-gray-100 transition-colors">
-                        <i className="fa-solid fa-gauge-high text-blue-600"></i> Admin Dashboard
+                        <i className="fa-solid fa-grip text-blue-600"></i> Admin Dashboard
                     </button>
                   )}
                   <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-sm text-red-700 hover:bg-red-50 flex items-center gap-3 cursor-pointer transition-colors">

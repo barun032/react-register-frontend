@@ -62,7 +62,7 @@ const StatusCards = () => {
         <StatCard
           title="Total Database Records"
           value={stats.totalRecords}
-          borderClass="border-blue-700"
+          borderClass="border-t-blue-800"
           textClass="text-blue-800"
           bgIconClass="bg-blue-50"
           icon={<FontAwesomeIcon icon={faDatabase} />}
@@ -72,7 +72,7 @@ const StatusCards = () => {
             <StatCard
               title="Pending / Action Required"
               value={stats.pendingRecords}
-              borderClass="border-amber-500"
+              borderClass="border-t-amber-700"
               textClass="text-amber-700"
               bgIconClass="bg-amber-50"
               icon={<FontAwesomeIcon icon={faHourglassHalf} />}
@@ -80,7 +80,7 @@ const StatusCards = () => {
             <StatCard
               title="Disposed / Completed"
               value={stats.completedRecords}
-              borderClass="border-green-600"
+              borderClass="border-t-green-700"
               textClass="text-green-700"
               bgIconClass="bg-green-50"
               icon={<FontAwesomeIcon icon={faCircleCheck} />}

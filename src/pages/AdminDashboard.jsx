@@ -91,11 +91,17 @@ const AdminDashboard = () => {
                 </div>
                 
                 <button
-                    onClick={() => navigate('/')} 
-                    className="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-bold rounded shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer text-sm"
-                >
-                    <span>&larr;</span> Back to Registers
-                </button>
+    onClick={() => navigate('/')}
+    className="group relative overflow-hidden px-4 py-2 bg-white border border-gray-300 text-gray-700 font-bold rounded shadow-sm cursor-pointer text-sm"
+>
+    {/* 1. The Sliding Gray Background Layer */}
+    <span className="absolute inset-0 w-full h-full bg-gray-200 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-right duration-300 ease-out"></span>
+    
+    {/* 2. The Text Content (Must be relative to sit on top of the background) */}
+    <span className="relative flex items-center gap-2">
+        <span>&larr;</span> Back to Registers
+    </span>
+</button>
             </div>
 
             {/* Top Stats Cards */}
@@ -200,11 +206,11 @@ const AdminDashboard = () => {
 };
 
 const StatCard = ({ label, value, icon, trend, color }) => {
-    // Official Government Colors
-    const borderColors = {
-        blue: "border-blue-700",
-        indigo: "border-indigo-700",
-        amber: "border-amber-600"
+    // Official Government Colors - UPDATED to target TOP BORDER only
+    const borderTopColors = {
+        blue: "border-t-blue-800",
+        indigo: "border-t-indigo-700",
+        amber: "border-t-amber-600"
     };
     
     const iconBgColors = {
@@ -214,7 +220,7 @@ const StatCard = ({ label, value, icon, trend, color }) => {
     };
 
     return (
-        <div className={`bg-white p-5 rounded shadow-sm border border-gray-300 border-t-4 ${borderColors[color]} hover:shadow-md transition-shadow`}>
+        <div className={`bg-white p-5 rounded shadow-sm border border-gray-300 border-t-4 ${borderTopColors[color]} hover:shadow-md transition-shadow`}>
             <div className="flex justify-between items-start">
                 <div>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">{label}</p>

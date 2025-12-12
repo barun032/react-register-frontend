@@ -116,7 +116,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
              <div className="bg-white w-full max-w-md rounded shadow-2xl overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200 border border-gray-400">
                 <div className="bg-blue-900 px-6 py-3 flex justify-between items-center border-b border-blue-800">
                     <h3 className="text-white font-bold text-base uppercase tracking-wide">{initialData ? 'Update Profile' : 'Authorize User'}</h3>
-                    <button onClick={onClose} className="text-white/80 hover:text-white transition"><i className="fa-solid fa-xmark"></i></button>
+                    <button onClick={onClose} className="text-white/80 hover:text-red-600 cursor-pointer transition"><i className="fa-solid fa-xmark"></i></button>
                 </div>
                 <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData); }} className="p-6 space-y-4 bg-gray-50">
                     {['name', 'email', 'password'].map((field) => (
@@ -137,8 +137,8 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                         </select>
                     </div>
                     <div className="pt-2 flex gap-3 border-t border-gray-200 mt-2">
-                        <button type="button" onClick={onClose} className="flex-1 py-2 border border-gray-300 text-gray-700 font-bold rounded hover:bg-gray-100 transition text-sm">Cancel</button>
-                        <button type="submit" className="flex-1 py-2 bg-blue-800 hover:bg-blue-900 text-white font-bold rounded shadow transition-all text-sm border border-blue-900">Confirm</button>
+                        <button type="button" onClick={onClose} className="cursor-pointer flex-1 py-2 border border-gray-300 text-gray-700 font-bold rounded hover:bg-gray-100 transition text-sm">Cancel</button>
+                        <button type="submit" className="cursor-pointer flex-1 py-2 bg-blue-800 hover:bg-blue-900 text-white font-bold rounded shadow transition-all text-sm border border-blue-900">Confirm</button>
                     </div>
                 </form>
              </div>

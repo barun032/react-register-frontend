@@ -12,7 +12,7 @@ export const RegisterProvider = ({ children }) => {
         { 
             id: 1, 
             name: 'Admin User', 
-            email: 'admin@gmail.com', 
+            email: 'barunmandalsecondary@gmail.com', 
             password: 'admin', 
             role: 'admin', 
             joined: new Date().toISOString().split('T')[0] 
