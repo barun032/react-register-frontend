@@ -1,146 +1,75 @@
-// src/components/PrintRangeModal.jsx
 import React, { useState, useEffect } from 'react';
 
 const PrintRangeModal = ({ isOpen, onClose, totalRecords, onConfirm }) => {
   const [startNo, setStartNo] = useState('1');
   const [endNo, setEndNo] = useState('');
-  
-  const maxNo = totalRecords.length > 0 
-    ? Math.max(...totalRecords.map(r => parseInt(r.id || 0))) 
-    : 0;
+  const maxNo = totalRecords.length > 0 ? Math.max(...totalRecords.map(r => parseInt(r.id || 0))) : 0;
 
   const getPreviewCount = () => {
     const start = parseInt(startNo) || 1;
     const end = parseInt(endNo) || maxNo;
     if (start > end || start < 1 || end > maxNo) return 0;
-    return totalRecords.filter(r => {
-      const id = parseInt(r.id || 0);
-      return id >= start && id <= end;
-    }).length;
+    return totalRecords.filter(r => { const id = parseInt(r.id || 0); return id >= start && id <= end; }).length;
   };
-
   const previewCount = getPreviewCount();
 
-  useEffect(() => {
-    if (!endNo && isOpen && maxNo > 0) {
-      setEndNo(maxNo.toString());
-    }
-  }, [maxNo, isOpen, endNo]);
-
+  useEffect(() => { if (!endNo && isOpen && maxNo > 0) setEndNo(maxNo.toString()); }, [maxNo, isOpen, endNo]);
   if (!isOpen) return null;
 
   const handleConfirm = () => {
     let start = parseInt(startNo) || 1;
     let end = parseInt(endNo) || maxNo;
-    if (start < 1) start = 1;
-    if (end > maxNo) end = maxNo;
-    if (start > end) [start, end] = [end, start];
-
-    const filtered = totalRecords.filter(r => {
-      const id = parseInt(r.id || 0);
-      return id >= start && id <= end;
-    });
-
-    if (filtered.length === 0) {
-      alert('No records found in this range.');
-      return;
-    }
-
-    onConfirm(filtered); // ← Now passing actual records, not just numbers
-    onClose();
+    if (start < 1) start = 1; if (end > maxNo) end = maxNo; if (start > end) [start, end] = [end, start];
+    const filtered = totalRecords.filter(r => { const id = parseInt(r.id || 0); return id >= start && id <= end; });
+    if (filtered.length === 0) { alert('No records found in this range.'); return; }
+    onConfirm(filtered); onClose();
   };
 
   return (
     <>
-      {/* Perfect blurred backdrop */}
-      <div 
-        className="fixed inset-0 backdrop-blur-sm z-50 transition-all duration-300"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity" onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden pointer-events-auto
-                        animate-in fade-in zoom-in-95 duration-300">
+        <div className="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200 border border-gray-300">
           
-          {/* Clean Header */}
-          <div className="bg-gradient-to-r from-slate-700 to-slate-900 px-8 py-6 text-white">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-2xl font-bold flex items-center gap-3">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                          d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                  </svg>
-                  Print Records
-                </h3>
-                <p className="text-slate-200 text-sm mt-1">Select range by Consecutive Number</p>
-              </div>
-              <button
-                onClick={onClose}
-                className="text-white/70 hover:text-white hover:bg-white/20 rounded-full p-2 transition"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+          <div className="bg-blue-900 px-6 py-4 text-white flex justify-between items-center border-b border-blue-800">
+            <div>
+              <h3 className="text-lg font-bold uppercase tracking-wide flex items-center gap-2">
+                <i className="fa-solid fa-print"></i> Print Configuration
+              </h3>
+              <p className="text-blue-200 text-xs mt-0.5">Select Record Range</p>
             </div>
+            <button onClick={onClose} className="text-white/80 hover:text-white transition"><i className="fa-solid fa-xmark text-lg"></i></button>
           </div>
 
-          <div className="p-8 space-y-6">
-            <div className="text-center">
-              <p className="text-2xl font-medium text-gray-800">
-                Total Records: <span className="font-bold text-slate-700">{maxNo}</span>
-              </p>
-              
+          <div className="p-6 space-y-5 bg-gray-50">
+            <div className="bg-white p-3 rounded border border-gray-200 text-center">
+              <p className="text-sm font-bold text-gray-600 uppercase">Total Available Records</p>
+              <p className="text-2xl font-bold text-blue-900 font-mono mt-1">{maxNo}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">From</label>
-                <input
-                  type="number"
-                  value={startNo}
-                  onChange={(e) => setStartNo(e.target.value)}
-                  className="w-full px-5 py-4 text-center text-lg font-medium border-2 border-gray-300 rounded-xl focus:border-slate-600 focus:ring-4 focus:ring-slate-100 transition-all"
-                  placeholder="1"
-                />
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Start ID</label>
+                <input type="number" value={startNo} onChange={(e) => setStartNo(e.target.value)}
+                  className="w-full px-3 py-2 text-center font-bold border border-gray-300 rounded focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none" placeholder="1" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">To</label>
-                <input
-                  type="number"
-                  value={endNo}
-                  onChange={(e) => setEndNo(e.target.value)}
-                  className="w-full px-5 py-4 text-center text-lg font-medium border-2 border-gray-300 rounded-xl focus:border-slate-600 focus:ring-4 focus:ring-slate-100 transition-all"
-                  placeholder={maxNo}
-                />
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">End ID</label>
+                <input type="number" value={endNo} onChange={(e) => setEndNo(e.target.value)}
+                  className="w-full px-3 py-2 text-center font-bold border border-gray-300 rounded focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none" placeholder={maxNo} />
               </div>
             </div>
 
             {previewCount > 0 && (
-              <div className="p-5 bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-xl text-center">
-                <p className="text-emerald-800 font-bold text-xl">
-                  Printing<span className="text-3xl mx-2 text-emerald-600">{previewCount}</span>Record{previewCount !== 1 ? 's' : ''}<span className='px-1'>...</span>
-                </p>
+              <div className="px-4 py-2 bg-green-50 border border-green-200 rounded text-center">
+                <p className="text-green-800 text-sm font-medium">Ready to print <span className="font-bold">{previewCount}</span> records.</p>
               </div>
             )}
 
-            <div className="flex gap-4">
-              <button
-                onClick={onClose}
-                className="flex-1 py-4 border-2 cursor-pointer border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirm}
-                className="flex-1 py-4 bg-gradient-to-r cursor-pointer from-slate-700 to-slate-900 text-white rounded-xl font-bold hover:from-slate-800 hover:to-black transition shadow-lg flex items-center justify-center gap-3"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                Print Now
+            <div className="flex gap-3 pt-2">
+              <button onClick={onClose} className="flex-1 py-2 border border-gray-300 text-gray-700 bg-white rounded font-bold hover:bg-gray-100 transition text-sm uppercase">Cancel</button>
+              <button onClick={handleConfirm} className="flex-1 py-2 bg-blue-800 text-white rounded font-bold hover:bg-blue-900 transition shadow-sm border border-blue-900 flex items-center justify-center gap-2 text-sm uppercase">
+                <i className="fa-solid fa-print"></i> Print
               </button>
             </div>
           </div>
@@ -149,5 +78,4 @@ const PrintRangeModal = ({ isOpen, onClose, totalRecords, onConfirm }) => {
     </>
   );
 };
-
 export default PrintRangeModal;

@@ -1,95 +1,89 @@
-// src/components/StatusCards.js
 import React from 'react';
 import { useRegister } from '../context/RegisterContext';
 import { statusTypes, registerTypes } from '../data/registerData';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleCheck,faHourglassHalf, faDatabase } from '@fortawesome/free-solid-svg-icons';
+import { faCircleCheck, faHourglassHalf, faDatabase } from '@fortawesome/free-solid-svg-icons';
 
 const StatusCards = () => {
   const { currentRecords: records, selectedRegister, selectedPart } = useRegister();
   
   const calculateStats = () => {
-    // If it's Dispatch Register → return zeros for status-based stats
     if (selectedRegister === registerTypes.ISSUED) {
-      return {
-        totalRecords: records.length,
-        pendingRecords: 0,
-        completedRecords: 0
-      };
+      return { totalRecords: records.length, pendingRecords: 0, completedRecords: 0 };
     }
-
-    // Only for Receive Register (or any future register that has status)
     const pendingRecords = records.filter(record =>
-      record.status === statusTypes.PENDING ||
-      record.status === statusTypes.IN_PROGRESS ||
-      record.status === statusTypes.PARTIALLY_ISSUED
+      record.status === statusTypes.PENDING || record.status === statusTypes.IN_PROGRESS || record.status === statusTypes.PARTIALLY_ISSUED
     ).length;
-
     const completedRecords = records.filter(record =>
-      record.status === statusTypes.COMPLETED ||
-      record.status === statusTypes.ACKNOWLEDGED
+      record.status === statusTypes.COMPLETED || record.status === statusTypes.ACKNOWLEDGED
     ).length;
-
-    return {
-      totalRecords: records.length,
-      pendingRecords,
-      completedRecords
-    };
+    return { totalRecords: records.length, pendingRecords, completedRecords };
   };
 
   const stats = calculateStats();
 
-  const StatCard = ({ title, value, color, icon }) => (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-      <div className="flex items-center justify-between">
+  const StatCard = ({ title, value, borderClass, textClass, icon, bgIconClass }) => (
+    <div className={`bg-white rounded shadow-sm border border-gray-300 relative overflow-hidden group border-t-4 ${borderClass}`}>
+      <div className="p-5 flex justify-between items-start">
         <div>
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{title}</p>
+            <p className={`text-3xl font-bold mt-2 ${textClass} font-mono`}>{value}</p>
         </div>
-        <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${color} bg-opacity-10`}>
-          <span className="text-xl">{icon}</span>
+        <div className={`p-3 rounded-md border border-gray-200 ${bgIconClass}`}>
+            <span className={`text-xl ${textClass}`}>{icon}</span>
         </div>
+      </div>
+      <div className="bg-gray-50 px-5 py-2 border-t border-gray-200 flex justify-between items-center">
+        <span className="text-[10px] text-gray-500 font-bold uppercase">Official Count</span>
+        <span className="text-[10px] text-gray-400">Updated: Just now</span>
       </div>
     </div>
   );
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-          <span className='pr-2'>Register of Letter</span>
-          {selectedRegister.replace(' Register', '')}
-          {selectedRegister === registerTypes.RECEIVE && selectedPart && (
-            <span className="text-lg font-semibold text-slate-700 ml-2 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
-              {selectedPart}
+    <div className="px-4 sm:px-6 lg:px-8 py-6 bg-gray-100 border-b border-gray-200">
+      <div className="mb-6 pb-2 border-b border-gray-300 flex flex-col sm:flex-row sm:items-baseline justify-between">
+        <div>
+            <h2 className="text-2xl font-bold text-blue-900 font-serif">
+            {selectedRegister}
+            </h2>
+            <p className="text-sm text-gray-600 mt-1 font-medium">
+            Government Record Overview
+            </p>
+        </div>
+        {selectedRegister === registerTypes.RECEIVE && selectedPart && (
+            <span className="text-sm font-bold text-gray-700 bg-white border border-gray-300 px-3 py-1 rounded shadow-sm mt-2 sm:mt-0">
+                SECTION: {selectedPart}
             </span>
-          )}
-        </h2>
-        <p className="text-gray-600">
-          Track and manage your document workflow
-        </p>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
-          title="Total Records"
+          title="Total Database Records"
           value={stats.totalRecords}
-          color="text-blue-500"
-          icon={<FontAwesomeIcon icon={faDatabase} className="w-6 h-6" />}
+          borderClass="border-blue-700"
+          textClass="text-blue-800"
+          bgIconClass="bg-blue-50"
+          icon={<FontAwesomeIcon icon={faDatabase} />}
         />
         {selectedRegister === registerTypes.RECEIVE && (
           <>
             <StatCard
-              title="Pending Actions"
+              title="Pending / Action Required"
               value={stats.pendingRecords}
-              color="text-amber-500"
-              icon={<FontAwesomeIcon icon={faHourglassHalf} className="w-6 h-6" />}
+              borderClass="border-amber-500"
+              textClass="text-amber-700"
+              bgIconClass="bg-amber-50"
+              icon={<FontAwesomeIcon icon={faHourglassHalf} />}
             />
             <StatCard
-              title="Completed"
+              title="Disposed / Completed"
               value={stats.completedRecords}
-              color="text-emerald-500"
-              icon={<FontAwesomeIcon icon={faCircleCheck} className="w-6 h-6" />}
+              borderClass="border-green-600"
+              textClass="text-green-700"
+              bgIconClass="bg-green-50"
+              icon={<FontAwesomeIcon icon={faCircleCheck} />}
             />
           </>
         )}

@@ -1,4 +1,3 @@
-// src/components/Header.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { registerTypes, receivePartTypes } from '../data/registerData';
 import { useRegister } from '../context/RegisterContext';
@@ -10,8 +9,7 @@ const Header = ({ onCreateClick }) => {
   const { 
     selectedRegister, setSelectedRegister, 
     selectedPart, setSelectedPart,
-    logout, // Import logout
-    currentUser 
+    logout, currentUser 
   } = useRegister();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -35,82 +33,92 @@ const Header = ({ onCreateClick }) => {
   const handleLogout = () => {
     setIsUserMenuOpen(false);
     logout(); 
-    navigate('/login'); // Redirect to Login Page
+    navigate('/login');
   };
 
   const getCreateButtonText = () => {
     switch (selectedRegister) {
-      case registerTypes.RECEIVE: return 'Create Receive';
-      case registerTypes.ISSUED: return 'Create Dispatch';
-      default: return 'Create';
+      case registerTypes.RECEIVE: return 'New Receipt Entry';
+      case registerTypes.ISSUED: return 'New Dispatch Entry';
+      default: return 'Create Entry';
     }
   };
 
+  const selectClass = "w-full px-3 py-2 border border-blue-300 rounded bg-blue-50 text-blue-900 text-sm font-semibold focus:border-blue-700 focus:ring-1 focus:ring-blue-700 outline-none cursor-pointer shadow-sm";
+
   return (
-    <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-40">
+    <header className="bg-white border-b-4 border-blue-900 sticky top-0 z-40 shadow-md">
+      {/* Top Government Strip */}
+      <div className="bg-blue-900 text-white py-1 px-4 text-[11px] uppercase font-bold tracking-widest text-center sm:text-left shadow-sm">
+        Government of West Bengal • Register Management Portal
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row justify-between items-center py-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center py-3">
           
-          {/* Logo Section */}
+          {/* Logo & Department Name */}
           <div className="flex items-center mb-4 sm:mb-0">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg">
-             <img src={logo} alt="logo" />
+            <div className="flex items-center justify-center w-14 h-14 p-1">
+             <img src={logo} alt="logo" className="h-full w-auto object-contain drop-shadow-sm" />
             </div>
             <div className="ml-3">
-              <h1 className="text-xl font-semibold text-gray-900">Register Management</h1>
-              <p className="text-sm text-gray-500">Welcome, {currentUser?.name || 'User'}</p>
+              <h1 className="text-xl font-bold text-gray-800 leading-tight font-serif tracking-tight">
+                Department of Information
+              </h1>
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-wide">Document Tracking System (DTS)</p>
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            {/* ... (Selectors remain the same) ... */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            {/* Part Selector */}
             {selectedRegister === registerTypes.RECEIVE && (
-              <div className="relative w-full sm:w-40">
-                <select value={selectedPart} onChange={(e) => setSelectedPart(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 appearance-none cursor-pointer focus:border-slate-500 focus:outline-none">
+              <div className="relative w-full sm:w-44">
+                <select value={selectedPart} onChange={(e) => setSelectedPart(e.target.value)} className={selectClass}>
                   {Object.values(receivePartTypes).map((part) => <option key={part} value={part}>{part}</option>)}
                 </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                </div>
               </div>
             )}
 
-            <div className="relative w-full sm:w-48">
-              <select value={selectedRegister} onChange={(e) => setSelectedRegister(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 appearance-none cursor-pointer focus:border-slate-500 focus:outline-none">
+            {/* Register Selector */}
+            <div className="relative w-full sm:w-52">
+              <select value={selectedRegister} onChange={(e) => setSelectedRegister(e.target.value)} className={selectClass}>
                 {Object.values(registerTypes).map((type) => <option key={type} value={type}>{type}</option>)}
               </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-              </div>
             </div>
             
-            <button onClick={ onCreateClick } className="w-full sm:w-auto px-5 py-2.5 bg-slate-700 text-white font-medium cursor-pointer rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+            <button onClick={ onCreateClick } className="w-full sm:w-auto px-6 py-2 bg-green-700 text-white text-sm font-bold rounded shadow hover:bg-green-800 transition-colors flex items-center justify-center gap-2 cursor-pointer border border-green-800 active:transform active:scale-95">
+              <i className="fa-solid fa-plus-circle"></i>
               {getCreateButtonText()}
             </button>
 
-            {/* Admin/User Menu */}
-            <div className="relative mx-[10px]" ref={menuRef}>
-              <button onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className="flex flex-col items-center text-gray-500 hover:text-slate-700 transition-colors cursor-pointer" title="User Menu">
-                 <i className="fa-solid fa-circle-user text-3xl"></i>
-                 <span className="text-[11px] font-bold mt-1 max-w-[80px] truncate leading-tight">
-                    {currentUser?.name || 'User'}
+            {/* User Profile */}
+            <div className="relative mx-2" ref={menuRef}>
+              <button 
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
+                className="flex flex-col items-center text-gray-600 hover:text-blue-900 transition-colors cursor-pointer group" 
+                title="User Profile"
+              >
+                 <div className="p-1 rounded-full border-2 border-gray-200 group-hover:border-blue-600 bg-gray-50 transition-colors">
+                    <i className="fa-solid fa-user text-lg px-1.5 py-0.5 text-gray-500 group-hover:text-blue-700"></i>
+                 </div>
+                 <span className="text-[10px] font-bold mt-0.5 text-blue-900 uppercase tracking-tight">
+                    {currentUser?.name?.split(' ')[0] || 'User'}
                  </span>
               </button>
 
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
-                  {/* Dashboard Option - Only if Admin */}
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded shadow-xl border border-gray-300 py-0 z-50 overflow-hidden">
+                   <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                      <p className="text-xs font-bold text-gray-800 uppercase tracking-wide">Signed in as</p>
+                      <p className="text-xs text-gray-600 truncate font-mono mt-1">{currentUser?.email}</p>
+                   </div>
                   {currentUser?.role === 'admin' && (
-                    <button onClick={handleDashboardSelect} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 transition-colors flex items-center gap-3 cursor-pointer">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                        Dashboard
+                    <button onClick={handleDashboardSelect} className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-800 flex items-center gap-3 cursor-pointer border-b border-gray-100 transition-colors">
+                        <i className="fa-solid fa-gauge-high text-blue-600"></i> Admin Dashboard
                     </button>
                   )}
-                  <div className="h-px bg-gray-100 my-1"></div>
-                  <button onClick={handleLogout} className="w-full text-left px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-3 cursor-pointer">
-                    <svg className="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                    Logout
+                  <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-sm text-red-700 hover:bg-red-50 flex items-center gap-3 cursor-pointer transition-colors">
+                    <i className="fa-solid fa-power-off"></i> Sign Out
                   </button>
                 </div>
               )}
