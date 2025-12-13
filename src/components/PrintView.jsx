@@ -46,7 +46,7 @@ const PrintView = ({ selectedRegister, selectedPart, records, onClose }) => {
               /* CHANGED: Increased top margin to 25mm */
               margin-top: 25mm; 
               margin-right: 10mm;
-              margin-bottom: 10mm;
+              margin-bottom: 0mm;
               margin-left: 10mm;
             }
             body { -webkit-print-color-adjust: exact; font-family: 'Times New Roman', serif; }

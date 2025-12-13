@@ -1,6 +1,14 @@
 import React, { useRef } from 'react';
+import { registerTypes } from '../data/registerData'; // Ensure this is imported to check register type
 
-const TableToolbar = ({ searchQuery, setSearchQuery, dateFrom, setDateFrom, dateTo, setDateTo, onPrint, filteredCount, sortOrder, selectedRegister }) => {
+const TableToolbar = ({ 
+  searchQuery, setSearchQuery, 
+  dateFrom, setDateFrom, 
+  dateTo, setDateTo, 
+  onPrint, filteredCount, 
+  filterStatus, setFilterStatus, // New props
+  selectedRegister 
+}) => {
   const fromInputRef = useRef(null);
   const toInputRef = useRef(null);
 
@@ -34,6 +42,24 @@ const TableToolbar = ({ searchQuery, setSearchQuery, dateFrom, setDateFrom, date
 
         {/* Right */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          
+          {/* STATUS FILTER (Only show for RECEIVE register where status exists) */}
+          {selectedRegister === registerTypes.RECEIVE && (
+            <div className="relative">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="appearance-none w-full sm:w-36 px-3 py-1.5 pl-9 h-9 border border-gray-300 rounded bg-white text-sm text-gray-800 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none shadow-sm cursor-pointer font-medium"
+              >
+                <option value="ALL">All Status</option>
+                <option value="PENDING">Pending</option>
+                <option value="COMPLETED">Completed</option>
+              </select>
+              <i className="fa-solid fa-filter absolute left-3 top-2.5 text-gray-400 text-xs pointer-events-none"></i>
+              <i className="fa-solid fa-chevron-down absolute right-3 top-3 text-gray-400 text-[10px] pointer-events-none"></i>
+            </div>
+          )}
+
           {/* DATE RANGE */}
           <div onClick={handleContainerClick} className="relative flex items-center bg-white border border-gray-300 rounded hover:border-blue-500 transition-colors cursor-pointer min-w-64 h-9 shadow-sm group">
             <div onClick={(e) => { e.stopPropagation(); openFrom(); }} className="absolute inset-0 left-0 right-1/2 z-10" title="Start Date" />

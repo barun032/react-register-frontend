@@ -6,6 +6,7 @@ import TableToolbar from './TableToolbar';
 
 const columnConfig = { 'Consecutive No.': 'w-16 min-w-[60px]', 'Date': 'min-w-[110px]', 'Short subject': 'min-w-[300px] max-w-[500px]', 'Remarks': 'min-w-[200px]', 'From whom received': 'min-w-[200px]', 'To whom addressed': 'min-w-[200px]', 'Name of the Officer.': 'min-w-[150px]', 'Date of receipt in office': 'min-w-[120px]', 'Reference Date': 'min-w-[120px]', };
 
+// Helper to determine status color
 const getStatusFromRecord = (record) => {
   if (record.dispatchMemoNo && record.dispatchMemoNo.trim() !== '') return statusTypes.COMPLETED || 'Completed';
   const actionType = record.actionType;
@@ -18,11 +19,27 @@ const getStatusFromRecord = (record) => {
   }
 };
 
+// Helper: Check if value is YYYY-MM-DD
+const isDateString = (val) => {
+  if (typeof val !== 'string') return false;
+  return /^\d{4}-\d{2}-\d{2}$/.test(val);
+};
+
+// Helper: Format to DD/MM/YYYY
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+};
+
 const RecordTable = ({ onPrint, onEdit }) => {
-  const { currentRecords: records, selectedRegister } = useRegister();
+  // Access currentUser from context
+  const { currentRecords: records, selectedRegister, currentUser } = useRegister();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [filterStatus, setFilterStatus] = useState('ALL');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sortOrder, setSortOrder] = useState('desc');
@@ -30,8 +47,27 @@ const RecordTable = ({ onPrint, onEdit }) => {
   const tableHeaders = registerTableHeaders[selectedRegister] || [];
   const fieldMappings = registerFieldMappings[selectedRegister] || {};
 
+  // Check if user is admin safely
+  const isAdmin = currentUser?.role === 'admin';
+
   const processedRecords = useMemo(() => {
     let result = [...records];
+
+    // 1. Status Filter
+    if (filterStatus !== 'ALL' && selectedRegister === registerTypes.RECEIVE) {
+        result = result.filter(record => {
+            const status = getStatusFromRecord(record);
+            if (filterStatus === 'PENDING') {
+                return [statusTypes.PENDING, statusTypes.IN_PROGRESS, statusTypes.PARTIALLY_ISSUED, 'Pending', 'In Progress'].includes(status);
+            }
+            if (filterStatus === 'COMPLETED') {
+                return [statusTypes.COMPLETED, 'Completed'].includes(status);
+            }
+            return true;
+        });
+    }
+
+    // 2. Date Filter
     if (dateFrom || dateTo) {
       result = result.filter(record => {
         const recordDate = record.date ? new Date(record.date) : null;
@@ -44,6 +80,8 @@ const RecordTable = ({ onPrint, onEdit }) => {
         return true;
       });
     }
+
+    // 3. Search Filter
     if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         result = result.filter(record => {
@@ -53,15 +91,17 @@ const RecordTable = ({ onPrint, onEdit }) => {
             return id.includes(q) || subject.includes(q) || person.includes(q);
         });
     }
+
+    // 4. Sorting
     result.sort((a, b) => {
         const idA = parseInt(a.id || '0', 10);
         const idB = parseInt(b.id || '0', 10);
         return sortOrder === 'asc' ? idA - idB : idB - idA;
     });
     return result;
-  }, [records, searchQuery, dateFrom, dateTo, selectedRegister, sortOrder]);
+  }, [records, searchQuery, dateFrom, dateTo, selectedRegister, sortOrder, filterStatus]);
 
-  useEffect(() => { setCurrentPage(1); }, [selectedRegister, records, searchQuery, dateFrom, dateTo, rowsPerPage]);
+  useEffect(() => { setCurrentPage(1); }, [selectedRegister, records, searchQuery, dateFrom, dateTo, rowsPerPage, filterStatus]);
 
   const totalPages = Math.ceil(processedRecords.length / rowsPerPage);
   const paginatedRecords = useMemo(() => {
@@ -109,9 +149,12 @@ const RecordTable = ({ onPrint, onEdit }) => {
     <div className="px-4 sm:px-6 lg:px-8 pb-8 px-4 sm:px-6 lg:px-8 py-6 bg-gray-100 border-b border-gray-200">
       <div className="bg-white rounded border border-gray-300 shadow-sm overflow-hidden">
         <TableToolbar
-          searchQuery={searchQuery} setSearchQuery={setSearchQuery} dateFrom={dateFrom} setDateFrom={setDateFrom}
-          dateTo={dateTo} setDateTo={setDateTo} onPrint={onPrint} filteredCount={processedRecords.length}
+          searchQuery={searchQuery} setSearchQuery={setSearchQuery} 
+          dateFrom={dateFrom} setDateFrom={setDateFrom}
+          dateTo={dateTo} setDateTo={setDateTo} 
+          onPrint={onPrint} filteredCount={processedRecords.length}
           sortOrder={sortOrder} selectedRegister={selectedRegister}
+          filterStatus={filterStatus} setFilterStatus={setFilterStatus}
         />
 
         <div className="overflow-x-auto relative">
@@ -133,7 +176,13 @@ const RecordTable = ({ onPrint, onEdit }) => {
                     );
                   })}
                   {rowIndex === 0 && selectedRegister === registerTypes.RECEIVE && <th rowSpan={tableHeaders.length} className="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase border border-gray-300">Status</th>}
-                  {rowIndex === 0 && <th rowSpan={tableHeaders.length} className="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase border border-gray-300">Action</th>}
+                  
+                  {/* ADMIN: Action Column Header */}
+                  {rowIndex === 0 && isAdmin && (
+                    <th rowSpan={tableHeaders.length} className="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase border border-gray-300">
+                      Action
+                    </th>
+                  )}
                 </tr>
               ))}
             </thead>
@@ -168,17 +217,28 @@ const RecordTable = ({ onPrint, onEdit }) => {
                           </td>
                         );
                       }
+
+                      // Apply Date Formatting Logic here
+                      let displayValue = value ?? '';
+                      if (isDateString(value)) {
+                          displayValue = formatDate(value);
+                      }
+
                       return (
                         <td key={colIndex} className="px-3 py-2 text-sm text-gray-800 border border-gray-300 leading-snug">
-                          {value ?? ''}
+                          {displayValue}
                         </td>
                       );
                     })}
-                    <td className="px-2 py-1 text-center border border-gray-300">
-                      <button onClick={() => onEdit && onEdit(record)} className="text-center cursor-pointer p-1.5 rounded hover:bg-gray-200 transition" title="Modify Record">
-                        <i className="fa-solid fa-pen-to-square text-blue-600 hover:text-blue-800 text-base"></i>
-                      </button>
-                    </td>
+                    
+                    {/* ADMIN: Action Cell */}
+                    {isAdmin && (
+                      <td className="px-2 py-1 text-center border border-gray-300">
+                        <button onClick={() => onEdit && onEdit(record)} className="text-center cursor-pointer p-1.5 rounded hover:bg-gray-200 transition" title="Modify Record">
+                          <i className="fa-solid fa-pen-to-square text-blue-600 hover:text-blue-800 text-base"></i>
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
