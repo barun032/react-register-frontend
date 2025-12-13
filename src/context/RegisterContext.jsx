@@ -7,15 +7,33 @@ const RegisterContext = createContext();
 
 export const RegisterProvider = ({ children }) => {
 
+    // --- NEW: Officer Management State ---
+    const [officers, setOfficers] = useLocalStorage('officerList', [
+        'SI Rupali Santra',
+        'SI Bikash Sen',
+        'SI Sadhana Singha',
+        'SI Ummey Salma'
+    ]);
+
+    const addOfficer = (name) => {
+        if (!officers.includes(name)) {
+            setOfficers([...officers, name]);
+        }
+    };
+
+    const deleteOfficer = (name) => {
+        setOfficers(officers.filter(o => o !== name));
+    };
+
     // 1. User State (Default Admin User)
     const [users, setUsers] = useLocalStorage('appUsers', [
-        { 
-            id: 1, 
-            name: 'Admin User', 
-            email: 'barunmandalsecondary@gmail.com', 
-            password: 'admin', 
-            role: 'admin', 
-            joined: new Date().toISOString().split('T')[0] 
+        {
+            id: 1,
+            name: 'Admin User',
+            email: 'barunmandalsecondary@gmail.com',
+            password: 'admin',
+            role: 'admin',
+            joined: new Date().toISOString().split('T')[0]
         }
     ]);
 
@@ -43,7 +61,7 @@ export const RegisterProvider = ({ children }) => {
         sessionStorage.removeItem('currentUser');
     };
 
-    
+
     const [allRecords, setAllRecords] = useLocalStorage('onlineRegister', {
         [registerTypes.RECEIVE]: {
             [receivePartTypes.PART_I]: [],
@@ -121,7 +139,7 @@ export const RegisterProvider = ({ children }) => {
     };
 
     const updateRecord = (registerType, part, id, updatedFields) => {
-         setAllRecords(prev => {
+        setAllRecords(prev => {
             const copy = { ...prev };
             if (registerType === registerTypes.RECEIVE) {
                 const list = [...copy[registerTypes.RECEIVE][part]];
@@ -143,10 +161,10 @@ export const RegisterProvider = ({ children }) => {
 
     const addUser = (userData) => {
         const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
-        const newUser = { 
-            id: newId, 
+        const newUser = {
+            id: newId,
             joined: new Date().toISOString().split('T')[0],
-            ...userData 
+            ...userData
         };
         setUsers([...users, newUser]);
     };
@@ -161,10 +179,14 @@ export const RegisterProvider = ({ children }) => {
 
     const value = {
         allRecords,
-        users,        
-        addUser,      
-        updateUser,   
-        deleteUser,   
+        users,
+        addUser,
+        updateUser,
+        deleteUser,
+        // Expose Officer Data
+        officers,
+        addOfficer,
+        deleteOfficer,
         selectedRegister,
         selectedPart,
         currentRecords,
@@ -173,8 +195,8 @@ export const RegisterProvider = ({ children }) => {
         addNewRecord,
         updateRecord,
         getNextConsecutiveNumber,
-        currentUser,  
-        login,        
+        currentUser,
+        login,
         logout,
     };
 

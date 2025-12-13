@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // 1. Imported useEffect
 import { useRegister } from '../context/RegisterContext';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../public/logo.png'; 
@@ -9,10 +9,25 @@ const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
 
+  // 2. Logic to auto-hide error after 3 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError('');
+      }, 3000); // Time in milliseconds (3000ms = 3 seconds)
+
+      return () => clearTimeout(timer); // Cleanup the timer on unmount or re-render
+    }
+  }, [error]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const result = login(formData.email, formData.password);
-    if (result.success) { navigate('/'); } else { setError(result.message); }
+    if (result.success) { 
+        navigate('/'); 
+    } else { 
+        setError(result.message); 
+    }
   };
 
   return (
@@ -58,7 +73,15 @@ const LoginPage = () => {
               />
             </div>
 
-            {error && <div className="text-red-700 text-sm text-center bg-red-50 border border-red-200 p-2 rounded font-medium">{error}</div>}
+            {/* 3. Updated Error Style */}
+            {error && (
+              <div className="flex items-center bg-red-50 border-l-4 border-red-600 p-3 rounded shadow-sm animate-pulse">
+                <svg className="h-5 w-5 text-red-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span className="text-red-700 text-sm font-medium">{error}</span>
+              </div>
+            )}
 
             <div>
               <button type="submit" className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded shadow-sm text-sm font-bold text-white bg-blue-800 hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 transition cursor-pointer uppercase tracking-wide">

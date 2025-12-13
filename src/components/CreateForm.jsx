@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { registerFields, registerTypes } from '../data/registerData';
+import { useRegister } from '../context/RegisterContext'; // 1. Added Import
 import { toast } from 'react-toastify';
 
 const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isOpen, onClose, onSubmit, initialData = null, mode = "create" }) => {
+
+  // 2. Get the dynamic officers list from Context
+  const { officers } = useRegister(); 
 
   const initializeFormData = () => {
     const fields = registerFields[selectedRegister] || [];
@@ -11,11 +15,10 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     return initData;
   };
 
-
   const [formData, setFormData] = useState(initialData || initializeFormData());
   const inputRefs = useRef({});
 
-  // --- 1. RESTORED PRESETS DATA ---
+  // --- PRESETS DATA ---
   const fieldPresets = {
     to: [
       "To\nThe Director of Information\nDepartment of Information & Cultural Affairs\nGovt. of West Bengal\nNabanna, 9th Floor\n325, Sarat Chatterjee Road,\nMandirtala, Shibpur\nHowrah-711102",
@@ -46,7 +49,7 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
     const value = formData[field.name] || '';
     const inputClass = "w-full px-3 py-2 border border-gray-300 rounded bg-white text-gray-900 text-sm focus:border-blue-700 focus:ring-1 focus:ring-blue-700 outline-none transition-all placeholder-gray-400";
 
-    // --- 2. RESTORED PRESET BUTTON LOGIC (THEMED) ---
+    // --- PRESET BUTTON LOGIC ---
     const isDispatchRegister = selectedRegister === registerTypes.ISSUED;
     const presets = isDispatchRegister ? fieldPresets[field.name] : null;
 
@@ -93,15 +96,29 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
       );
     }
 
-    if (field.type === 'select') return (
-      <div className="relative">
-        <select name={field.name} value={value} onChange={(e) => handleInputChange(field.name, e.target.value)} className={`${inputClass} appearance-none cursor-pointer`}>
-          <option value="">Select Option</option>
-          {field.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-        </select>
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">▼</div>
-      </div>
-    );
+    if (field.type === 'select') {
+      // 3. DYNAMIC OPTIONS LOGIC
+      // If the field is 'endorsedTo' or 'officerName', we use the list from Admin Dashboard (Context)
+      // Otherwise, we use the hardcoded options from registerData.js
+      let optionsToRender = field.options;
+
+      if (field.name === 'endorsedTo' || field.name === 'officerName') {
+         optionsToRender = officers;
+      }
+
+      return (
+        <div className="relative">
+          <select name={field.name} value={value} onChange={(e) => handleInputChange(field.name, e.target.value)} className={`${inputClass} appearance-none cursor-pointer`}>
+            <option value="">Select Option</option>
+            {/* 4. Map over the chosen options list */}
+            {optionsToRender && optionsToRender.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">▼</div>
+        </div>
+      );
+    }
 
     if (field.type === 'date') return (
       <div className='relative cursor-pointer' onClick={() => inputRefs.current[field.name]?.showPicker()}>
@@ -109,7 +126,6 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
       </div>
     );
 
-    // Standard Text Input (with presets support for single line inputs if needed)
     return (
       <div>
         {renderPresetButtons()}
@@ -127,7 +143,6 @@ const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isO
 
   const fields = registerFields[selectedRegister] || [];
 
-  // --- HELPER FOR MODAL TITLE ---
   const getModalTitle = () => {
     if (mode === 'edit') return 'Modify Record';
     return selectedRegister === registerTypes.RECEIVE ? 'New Receive Entry' : 'New Dispatch Entry';

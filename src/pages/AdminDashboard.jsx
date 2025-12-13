@@ -4,6 +4,7 @@ import { registerTypes, statusTypes } from '../data/registerData';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx'; 
 import UserManagement from '../components/UserManagement'; 
+import OfficerManagement from '../components/OfficerManagement';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -190,8 +191,9 @@ const AdminDashboard = () => {
             </div>
 
             {/* --- USER MANAGEMENT SECTION --- */}
-            <div className="mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
                 <UserManagement />
+                <OfficerManagement /> 
             </div>
 
             {/* Notification Toast */}
