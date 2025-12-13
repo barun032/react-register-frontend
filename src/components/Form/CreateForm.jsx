@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { registerFields, registerTypes } from '../data/registerData';
-import { useRegister } from '../context/RegisterContext'; // 1. Added Import
+import { registerFields, registerTypes } from '../../data/registerData';
+import { useRegister } from '../../context/RegisterContext'; // 1. Added Import
 import { toast } from 'react-toastify';
 
 const CreateForm = ({ selectedRegister, selectedPart, nextConsecutiveNumber, isOpen, onClose, onSubmit, initialData = null, mode = "create" }) => {

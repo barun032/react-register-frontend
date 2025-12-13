@@ -3,10 +3,10 @@ import { registerTypes } from '../data/registerData';
 import { useRegister } from '../context/RegisterContext';
 import Header from '../components/Header'; // Adjust path if needed
 import StatusCards from '../components/StatusCards';
-import RecordTable from '../components/RecordTable';
-import CreateForm from '../components/CreateForm';
-import PrintView from '../components/PrintView';
-import PrintRangeModal from '../components/PrintRangeModal';
+import RecordTable from '../components/Table/RecordTable';
+import CreateForm from '../components/Form/CreateForm';
+import PrintView from '../components/Print/PrintView';
+import PrintRangeModal from '../components/Print/PrintRangeModal';
 import Footer from '../components/Footer';
 
 // This component now holds the logic that used to be in App.jsx

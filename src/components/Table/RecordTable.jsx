@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useRegister } from '../context/RegisterContext';
-import { registerTableHeaders, registerFieldMappings, registerTypes, statusTypes } from '../data/registerData';
+import { useRegister } from '../../context/RegisterContext';
+import { registerTableHeaders, registerFieldMappings, registerTypes, statusTypes } from '../../data/registerData';
 import Pagination from './Pagination';
 import TableToolbar from './TableToolbar';
 

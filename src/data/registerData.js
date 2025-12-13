@@ -11,7 +11,7 @@ export const registerTypes = {
 // Update part types for Receive Register to Roman numerals
 export const receivePartTypes = {
   PART_I: 'Part I',
-  PART_II: 'Part II', 
+  PART_II: 'Part II',
   PART_III: 'Part III',
   PART_IV: 'Part IV'
 };
@@ -41,8 +41,8 @@ export const registerTableHeaders = {
       { name: 'Sl. No.' },
       { name: 'No. of the Collection' },
       { name: 'No. of the file within the collection' },
-      { name: 'Memo No.'},
-      { name: 'Dispatch Date'},
+      { name: 'Memo No.' },
+      { name: 'Dispatch Date' },
     ]
   ],
   [registerTypes.ISSUED]: [
@@ -65,8 +65,8 @@ export const registerTableHeaders = {
       { name: 'File No. & Serial No.' },
       { name: 'No. & title of collection' },
       { name: 'No. of file within the collection' },
-      {name: 'Part No.'},
-      {name: 'Ref No.'},
+      { name: 'Part No.' },
+      { name: 'Ref No.' },
       { name: 'Reminder No.' },
       { name: 'Reminder Date' },
       { name: 'Rs.' },
@@ -96,23 +96,23 @@ export const registerFieldMappings = {
     'Endorsed To': 'endorsedTo'
   },
   [registerTypes.ISSUED]: {
-  'Consecutive No.': 'id',
-  'Date': 'date',
-  'To whom addressed': 'to',
-  'Short subject': 'subject',
-  'File No. & Serial No.': 'fileSerialNo',
-  'No. & title of collection': 'collectionTitle',
-  'No. of file within the collection': 'fileInCollection',
-  'No. and date of reply receive': 'replyDetails',
-  'Part No.': 'receiveRefPart',
-  'Ref No.': 'receiveRefNo',
-  'Reminder No.': 'reminderNumber',
-  'Reminder Date': 'reminderDate',
-  'Rs.': 'stampRupees',
-  'P.': 'stampPaise',
-  'Remarks': 'remarks',
-  'Name of the Officer.': 'officerName'
-}
+    'Consecutive No.': 'id',
+    'Date': 'date',
+    'To whom addressed': 'to',
+    'Short subject': 'subject',
+    'File No. & Serial No.': 'fileSerialNo',
+    'No. & title of collection': 'collectionTitle',
+    'No. of file within the collection': 'fileInCollection',
+    'No. and date of reply receive': 'replyDetails',
+    'Part No.': 'receiveRefPart',
+    'Ref No.': 'receiveRefNo',
+    'Reminder No.': 'reminderNumber',
+    'Reminder Date': 'reminderDate',
+    'Rs.': 'stampRupees',
+    'P.': 'stampPaise',
+    'Remarks': 'remarks',
+    'Name of the Officer.': 'officerName'
+  }
 };
 
 // Updated form fields to match the table structure exactly
@@ -130,23 +130,20 @@ export const registerFields = {
     { name: 'serialNo', label: 'Serial No.', type: 'text' },
     { name: 'collectionNumber', label: 'No. of the Collection', type: 'text' },
     { name: 'fileInCollection', label: 'No. of file within the collection', type: 'text' },
-    { 
-      name: 'actionType', 
-      label: 'Type of action', 
-      type: 'select', 
+    {
+      name: 'actionType',
+      label: 'Type of action',
+      type: 'select',
       options: ['Returnable', 'Not Returnable', 'Attached to File']
     },
     { name: 'dispatchMemoNo', label: 'Dispatch Memo No.', type: 'number' },
     { name: 'dispatchDate', label: 'Dispatch Date', type: 'date' },
-    { 
-      name: 'endorsedTo', 
-      label: 'Endorsed To', 
-      type: 'select', 
+    {
+      name: 'endorsedTo',
+      label: 'Endorsed To',
+      type: 'select',
       options: [
-        'SI Rupali Santra',
-        'SI Bikash Sen',
-        'SI Sadhana Singha', 
-        'SI Ummey Salma',
+        ''
       ]
     }
   ],
@@ -184,7 +181,7 @@ export const registerFields = {
       name: 'officerName',
       label: 'Name of the Officer',
       type: 'select',
-      options: ['SI Rupali Santra', 'SI Bikash Sen', 'SI Sadhana Singha', 'SI Ummey Salma']
+      options: ['']
     },
     { name: 'remarks', label: 'Remarks', type: 'textarea' }
   ]
@@ -193,6 +190,6 @@ export const registerFields = {
 export const statusTypes = {
   PENDING: 'Pending',
   IN_PROGRESS: 'In Progress',
-  ACTION_TAKEN: 'Action Taken',       
+  ACTION_TAKEN: 'Action Taken',
   COMPLETED: 'Completed'
 };

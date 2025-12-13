@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { registerTableHeaders, registerFieldMappings, registerTypes } from '../data/registerData';
+import { registerTableHeaders, registerFieldMappings, registerTypes } from '../../data/registerData';
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';

@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { registerTypes } from '../data/registerData'; // Ensure this is imported to check register type
+import { registerTypes } from '../../data/registerData'; // Ensure this is imported to check register type
 
 const TableToolbar = ({ 
   searchQuery, setSearchQuery, 
